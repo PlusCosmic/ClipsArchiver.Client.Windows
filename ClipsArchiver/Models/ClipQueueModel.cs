@@ -1,4 +1,4 @@
-namespace Clips_Archiver.Models;
+namespace ClipsArchiver.Models;
 
 public class ClipQueueModel
 {

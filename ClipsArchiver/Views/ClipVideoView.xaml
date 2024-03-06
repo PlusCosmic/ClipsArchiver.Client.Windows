@@ -1,12 +1,80 @@
-<UserControl x:Class="Clips_Archiver.Views.ClipVideoView"
+<UserControl x:Class="ClipsArchiver.Views.ClipVideoView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:Clips_Archiver.Views"
+             xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
+             xmlns:viewModels="clr-namespace:ClipsArchiver.ViewModels"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:converters="clr-namespace:NKristek.Wpf.Converters;assembly=NKristek.Wpf.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-        
+             d:DesignHeight="300" d:DesignWidth="300"
+             d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:BoolToInverseVisibilityConverter x:Key="BoolToInverseVisibilityConverter"/>
+    </UserControl.Resources>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <ui:SymbolIcon Grid.Column="0" Symbol="ArrowLeft24" FontSize="24" PreviewMouseDown="BackIconPressed" HorizontalAlignment="Left"/>
+            <TextBlock Grid.Column="1" Text="{Binding SelectedClip.Clip.Filename}" HorizontalAlignment="Center"/>
+        </Grid>
+        <vlc:VideoView Grid.Row="1" x:Name="VideoView" MediaPlayer="{Binding MediaPlayer}" Margin="20"/>
+        <Grid Grid.Row="2" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Slider Grid.Column="0" Value="{Binding VideoProgress}" Minimum="0" Maximum="100" PreviewMouseDown="SliderMouseDown" PreviewMouseUp="SliderMouseUp" IsMoveToPointEnabled="True" Margin="12"/>
+                <TextBlock Grid.Column="1" Text="{Binding CurrentTimestamp}" VerticalAlignment="Center" Width="40"/>
+            </Grid>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <ui:SymbolIcon Symbol="Play24" FontSize="24" Margin="12, 0" Visibility="{Binding IsPlaying, Converter={StaticResource BoolToInverseVisibilityConverter}}">
+                        <ui:SymbolIcon.InputBindings>
+                            <MouseBinding Gesture="LeftClick" Command="{Binding PlayVideoCommand}"/>
+                        </ui:SymbolIcon.InputBindings>
+                    </ui:SymbolIcon>
+                    <ui:SymbolIcon Symbol="Pause24" FontSize="24" Margin="12, 0" Visibility="{Binding IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ui:SymbolIcon.InputBindings>
+                            <MouseBinding Gesture="LeftClick" Command="{Binding PauseVideoCommand}"/>
+                        </ui:SymbolIcon.InputBindings>
+                    </ui:SymbolIcon>
+                </Grid>
+                <Grid Grid.Column="1">
+                    <ui:SymbolIcon Symbol="Speaker024" FontSize="24" Margin="12, 0"/>
+                    <ui:SymbolIcon Symbol="Speaker124" FontSize="24" Margin="12, 0"/>
+                    <ui:SymbolIcon Symbol="Speaker224" FontSize="24" Margin="12, 0"/>
+                    <ui:SymbolIcon Symbol="SpeakerMute24" FontSize="24" Margin="12, 0"/>
+                </Grid>
+                <Slider Grid.Column="2" Width="40" Minimum="0" Maximum="100" Value="{Binding VideoVolume}"/>
+                <ui:SymbolIcon Grid.Column="5" Symbol="Previous24" FontSize="24" Margin="12, 0"/>
+                <ui:SymbolIcon Grid.Column="6" Symbol="Next24" FontSize="24" Margin="12, 0"/>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>
