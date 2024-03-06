@@ -4,9 +4,40 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:ClipsArchiver.Controls"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:models="clr-namespace:ClipsArchiver.Models"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
+             d:DesignHeight="300" d:DesignWidth="300"
+             d:DataContext="{d:DesignInstance models:ClipModel}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+    <Border CornerRadius="5" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="10">
+        <Grid Height="256" Width="256">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="144"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Border CornerRadius="5">
+                    <Border.Background>
+                        <ImageBrush Stretch="Fill" ImageSource="{Binding Thumbnail}"/>
+                    </Border.Background>
+                    <ui:SymbolIcon Symbol="Play24" Foreground="White" 
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center" 
+                                   Visibility="{Binding IsCachedForPlay, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                   PreviewMouseDown="PlayIconPressed"/>
+                </Border>
+                <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="{Binding Duration}" Margin="3" Padding="3, 0" Background="Black" Foreground="White"/>
+            </Grid>
         
-    </Grid>
+            <TextBlock Grid.Row="1" Text="{Binding Clip.Filename}"/>
+            <StackPanel Grid.Row="2" Orientation="Horizontal">
+                <TextBlock Text="{Binding ClipOwner.Name}"/>
+                <TextBlock Text="{Binding Clip.CreatedAt}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
 </UserControl>
