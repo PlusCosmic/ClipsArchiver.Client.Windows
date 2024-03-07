@@ -13,7 +13,7 @@ jobs:
      - name: Get Version from Project File
        id: get-version
        shell: bash
-       run: echo "version=$(grep -oE '<Version>[^<]+' MyApplication/MyApplication.csproj | sed 's/<Version>//')" >> $GITHUB_OUTPU
+       run: echo "version=$(grep -oE '<Version>[^<]+' ClipsArchiver/ClipsArchiver.csproj | sed 's/<Version>//')" >> $GITHUB_OUTPU
      - name: Install .NET
        uses: actions/setup-dotnet@v4
        with:
