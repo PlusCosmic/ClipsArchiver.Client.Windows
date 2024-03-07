@@ -6,8 +6,8 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
-        <Version>0.0.5</Version>
-        <AssemblyVersion>0.0.5</AssemblyVersion>
+        <Version>0.0.6</Version>
+        <AssemblyVersion>0.0.6</AssemblyVersion>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -25,6 +25,17 @@
       <PackageReference Include="Velopack" Version="0.0.349" />
       <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.20" />
       <PackageReference Include="WPF-UI" Version="3.0.0" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <None Remove="Resources\clipsarchiver.ico" />
+      <Resource Include="Resources\clipsarchiver.ico">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Resource>
+      <None Remove="Resources\clipsarchiver.png" />
+      <Resource Include="Resources\clipsarchiver.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Resource>
     </ItemGroup>
 
 </Project>
