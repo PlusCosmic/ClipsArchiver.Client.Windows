@@ -1,0 +1,29 @@
+name: Deploy to GitHub Releases
+
+on:
+  push:
+    branches:
+      - release
+jobs:
+  deploy-to-github-releases:
+    runs-on: windows-latest
+    steps:
+     - name: Checkout Repository
+       uses: actions/checkout@v4
+     - name: Get Version from Project File
+       id: get-version
+       shell: bash
+       run: echo "version=$(grep -oE '<Version>[^<]+' MyApplication/MyApplication.csproj | sed 's/<Version>//')" >> $GITHUB_OUTPU
+     - name: Install .NET
+       uses: actions/setup-dotnet@v4
+       with:
+          dotnet-version: 8.0.x
+     - name: Publish Application
+       run: dotnet publish ClipsArchiver/ClipsArchiver.csproj -c Release -o publish -r win-x64 --self-contained true    
+     - name: Create Velopack Release
+       run: |
+          dotnet tool install -g vpk
+          vpk download github --repoUrl https://github.com/PlusCosmic/ClipsArchiver.Client.Windows
+          vpk pack -u clipsArchiver -v ${{ steps.get-version.outputs.version }} -p publish
+          vpk upload github --repoUrl https://github.com/PlusCosmic/ClipsArchiver.Client.Windows --publish --releaseName "Clips Archiver ${{ steps.get-version.outputs.version }}" --tag v${{ steps.get-version.outputs.version }}
+          
