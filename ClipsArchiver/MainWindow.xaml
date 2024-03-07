@@ -16,6 +16,7 @@
         WindowStyle="ThreeDBorderWindow"
         WindowCornerPreference="Round"
         WindowStartupLocation="CenterScreen"
+        Icon="Resources/clipsarchiver.ico"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
         Height="1080" Width="1920">
@@ -36,7 +37,7 @@
             Title="The Clip Archive"
             Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
             <ui:TitleBar.Icon>
-                <ui:SymbolIcon Symbol="VideoClip24" FontSize="24"/>
+                <ui:ImageIcon Source="Resources/clipsarchiver.png"/>
             </ui:TitleBar.Icon>
         </ui:TitleBar>
         <controls:ClipSidebar Grid.Row="1" Grid.Column="0" />
