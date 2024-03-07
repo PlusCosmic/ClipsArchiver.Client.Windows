@@ -7,7 +7,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
     </PropertyGroup>
-
+    
+    <PropertyGroup>
+        <StartupObject>ClipsArchiver.Program</StartupObject>
+    </PropertyGroup>
+    
     <ItemGroup>
       <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
       <PackageReference Include="LazyCache" Version="2.4.0" />
@@ -19,10 +23,6 @@
       <PackageReference Include="Velopack" Version="0.0.349" />
       <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.20" />
       <PackageReference Include="WPF-UI" Version="3.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Infrastructure\" />
     </ItemGroup>
 
 </Project>
