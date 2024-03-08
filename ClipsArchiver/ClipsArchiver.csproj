@@ -6,8 +6,8 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
-        <Version>0.0.7</Version>
-        <AssemblyVersion>0.0.7</AssemblyVersion>
+        <Version>0.0.8</Version>
+        <AssemblyVersion>0.0.8</AssemblyVersion>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -33,12 +33,20 @@
     <ItemGroup>
       <None Remove="Resources\clipsarchiver.ico" />
       <Resource Include="Resources\clipsarchiver.ico">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Resource>
       <None Remove="Resources\clipsarchiver.png" />
       <Resource Include="Resources\clipsarchiver.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Resource>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Page Update="Windows\MainWindow.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <XamlRuntime>Wpf</XamlRuntime>
+        <SubType>Designer</SubType>
+      </Page>
     </ItemGroup>
 
 </Project>

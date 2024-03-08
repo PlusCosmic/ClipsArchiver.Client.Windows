@@ -83,8 +83,8 @@ public class ClipModel : INotifyPropertyChanged
     }
 
     public async Task CacheForPlay()
-    { 
-        VideoUri = await ClipsRestService.DownloadVideoByIdAsync(Clip.Id);
+    {
+        VideoUri = new Uri($"http://10.0.0.10:8080/clips/archive/{Clip.Filename}");
         IsCachedForPlay = true;
     }
     
