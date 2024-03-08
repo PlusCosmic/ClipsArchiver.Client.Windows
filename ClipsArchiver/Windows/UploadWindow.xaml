@@ -33,17 +33,17 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ui:Button Grid.Column="0" Content="Select Clips">
+            <ui:Button Grid.Column="0" Content="Select Clips" Margin="12">
                 <ui:Button.Icon>
                     <ui:SymbolIcon Symbol="FolderAdd24"/>
                 </ui:Button.Icon>
             </ui:Button>
-            <ui:Button Grid.Column="2" Content="Upload">
+            <ui:Button Grid.Column="2" Content="Upload" Margin="12">
                 <ui:Button.Icon>
                     <ui:SymbolIcon Symbol="ArrowUpload24"/>
                 </ui:Button.Icon>
             </ui:Button>
-            <ui:Button Grid.Column="3" Content="Close">
+            <ui:Button Grid.Column="3" Content="Close" Margin="12">
                 <ui:Button.Icon>
                     <ui:SymbolIcon Symbol="Dismiss24"/>
                 </ui:Button.Icon>
