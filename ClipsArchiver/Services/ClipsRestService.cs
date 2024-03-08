@@ -6,6 +6,7 @@ using ClipsArchiver.Entities;
 using LazyCache;
 using MetadataExtractor.Util;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace ClipsArchiver.Services;
 
@@ -21,8 +22,9 @@ public class ClipsRestService
     
     public static async Task<List<Clip>> GetClipsForDateAsync(DateTimeOffset date)
     {
+        Log.Debug($"Getting clips for date: {date.Date}");
         using HttpResponseMessage response = await _httpClient.GetAsync($"clips/date/{date.Year}-{date.Month}-{date.Day}");
-    
+        Log.Debug($"Got response: {response.StatusCode}");
         response.EnsureSuccessStatusCode();
     
         var jsonResponse = await response.Content.ReadAsStringAsync();
@@ -31,16 +33,17 @@ public class ClipsRestService
 
     public static async Task<BitmapImage> GetThumbnailForClipAsync(int clipId)
     {
+        Log.Debug($"Getting thumbnail for clip: {clipId}");
         if (File.Exists(Path.GetTempPath() + $@"ClipsArchiver\{clipId}.png"))
         {
+            Log.Debug($"Found thumbnail in cache: {Path.GetTempPath() + $@"ClipsArchiver\{clipId}.png"}");
             return new BitmapImage(new Uri(Path.GetTempPath() + $@"ClipsArchiver\{clipId}.png"));
         }
+        var response = await _httpClient.GetAsync($"clips/download/thumbnail/{clipId}");
+        Log.Debug($"Got response: {response.StatusCode}");
+        response.EnsureSuccessStatusCode();
         
-        var httpResult = await _httpClient.GetAsync($"clips/download/thumbnail/{clipId}");
-        
-        httpResult.EnsureSuccessStatusCode();
-        
-        using var resultStream = await httpResult.Content.ReadAsStreamAsync();
+        using var resultStream = await response.Content.ReadAsStreamAsync();
         
         if (!Directory.Exists(Path.GetTempPath() + $@"\ClipsArchiver"))
         {
@@ -63,11 +66,11 @@ public class ClipsRestService
             return new Uri(Path.GetTempPath() + $@"ClipsArchiver\{clipId}.mp4");
         }
         
-        var httpResult = await _httpClient.GetAsync($"clips/download/{clipId}");
+        var response = await _httpClient.GetAsync($"clips/download/{clipId}");
+        Log.Debug($"Got response: {response.StatusCode}");
+        response.EnsureSuccessStatusCode();
         
-        httpResult.EnsureSuccessStatusCode();
-        
-        using var resultStream = await httpResult.Content.ReadAsStreamAsync();
+        using var resultStream = await response.Content.ReadAsStreamAsync();
         
         if (!Directory.Exists(Path.GetTempPath() + $@"\ClipsArchiver"))
         {
@@ -86,36 +89,47 @@ public class ClipsRestService
     public static async Task UploadClipsAsync(List<string> clipPaths)
     {
         Settings settings = SettingsService.GetSettings();
+        List<Task> tasks = new();
         foreach (var clipPath in clipPaths)
         {
-            if (!File.Exists(clipPath))
-            {
-                continue;
-            }
-
-            FileStream stream = File.OpenRead(clipPath);
-
-            if (FileTypeDetector.DetectFileType(stream) != FileType.Mp4)
-            {
-                stream.Close();
-                continue;
-            }
-
-            DateTime dateTime = File.GetCreationTimeUtc(clipPath);
-
-            MultipartFormDataContent content = new MultipartFormDataContent();
-            content.Add(new StringContent($"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour}-{dateTime.Minute}"), "creationDateTime");
-            content.Add(new StreamContent(stream), "file", Path.GetFileName(clipPath));
-            await _httpClient.PostAsync($"/clips/upload/{settings.UserId}", content);
+            tasks.Add(UploadClipAsync(clipPath, settings.UserId));
         }
+
+        await Task.WhenAll(tasks);
+    }
+
+    private static async Task UploadClipAsync(string clipPath, int userId)
+    {
+        Log.Debug($"Uploading video file: {clipPath}");
+        if (!File.Exists(clipPath))
+        {
+            return;
+        }
+
+        FileStream stream = File.OpenRead(clipPath);
+
+        if (FileTypeDetector.DetectFileType(stream) != FileType.Mp4)
+        {
+            stream.Close();
+            return;
+        }
+
+        DateTime dateTime = File.GetCreationTimeUtc(clipPath);
+
+        MultipartFormDataContent content = new MultipartFormDataContent();
+        content.Add(new StringContent($"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour}-{dateTime.Minute}"), "creationDateTime");
+        content.Add(new StreamContent(stream), "file", Path.GetFileName(clipPath));
+        HttpResponseMessage response = await _httpClient.PostAsync($"/clips/upload/{userId}", content);
+        Log.Debug($"Got response: {response.StatusCode}");
     }
 
     public static async Task<List<User>> GetAllUsersAsync()
     {
         return await _cache.GetOrAddAsync(CacheKeys.AllUsersKey, async() =>
         {
+            Log.Debug($"Getting all users");
             using HttpResponseMessage response = await _httpClient.GetAsync("users");
-
+            Log.Debug($"Got response: {response.StatusCode}");
             response.EnsureSuccessStatusCode();
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
