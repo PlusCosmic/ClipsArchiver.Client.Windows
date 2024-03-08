@@ -1,4 +1,4 @@
-﻿<ui:FluentWindow x:Class="ClipsArchiver.MainWindow"
+﻿<ui:FluentWindow x:Class="ClipsArchiver.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -16,7 +16,7 @@
         WindowStyle="ThreeDBorderWindow"
         WindowCornerPreference="Round"
         WindowStartupLocation="CenterScreen"
-        Icon="Resources/clipsarchiver.ico"
+        Icon="/Resources/clipsarchiver.ico"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
         Height="1080" Width="1920">
@@ -37,7 +37,7 @@
             Title="The Clip Archive"
             Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
             <ui:TitleBar.Icon>
-                <ui:ImageIcon Source="Resources/clipsarchiver.png"/>
+                <ui:ImageIcon Source="\Resources\clipsarchiver.png"/>
             </ui:TitleBar.Icon>
         </ui:TitleBar>
         <controls:ClipSidebar Grid.Row="1" Grid.Column="0" />

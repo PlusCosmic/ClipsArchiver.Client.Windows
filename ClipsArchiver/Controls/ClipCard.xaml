@@ -6,11 +6,13 @@
              xmlns:local="clr-namespace:ClipsArchiver.Controls"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:models="clr-namespace:ClipsArchiver.Models"
+             xmlns:converters="clr-namespace:NKristek.Wpf.Converters;assembly=NKristek.Wpf.Converters"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
              d:DataContext="{d:DesignInstance models:ClipModel}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:BoolToInverseVisibilityConverter x:Key="BoolToInverseVisibilityConverter"/>
     </UserControl.Resources>
     <Border CornerRadius="5" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="10">
         <Grid Height="256" Width="256">
@@ -24,11 +26,14 @@
                     <Border.Background>
                         <ImageBrush Stretch="Fill" ImageSource="{Binding Thumbnail}"/>
                     </Border.Background>
-                    <ui:SymbolIcon Symbol="Play24" Foreground="White" 
-                                   HorizontalAlignment="Center" 
-                                   VerticalAlignment="Center" 
-                                   Visibility="{Binding IsCachedForPlay, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                   PreviewMouseDown="PlayIconPressed"/>
+                    <Grid>
+                        <ui:SymbolIcon Symbol="Play24" Foreground="White" 
+                                       HorizontalAlignment="Center" 
+                                       VerticalAlignment="Center" 
+                                       Visibility="{Binding IsCachedForPlay, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                       PreviewMouseDown="PlayIconPressed"/>
+                        <ui:ProgressRing Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center" IsIndeterminate="True" Visibility="{Binding IsCachedForPlay, Converter={StaticResource BoolToInverseVisibilityConverter}}"/>
+                    </Grid>
                 </Border>
                 <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="{Binding Duration}" Margin="3" Padding="3, 0" Background="Black" Foreground="White"/>
             </Grid>

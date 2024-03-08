@@ -165,11 +165,17 @@ public class MainWindowViewModel : INotifyPropertyChanged
     }
 
     private bool _isUploading;
-
     public bool IsUploading
     {
         get => _isUploading;
         set => SetField(ref _isUploading, value);
+    }
+    
+    private bool _isLoadingClipsForDate;
+    public bool IsLoadingClipsForDate
+    {
+        get => _isLoadingClipsForDate;
+        set => SetField(ref _isLoadingClipsForDate, value);
     }
 
     public RelayCommand GoBackDayCommand { get; private set; }
@@ -304,6 +310,30 @@ public class MainWindowViewModel : INotifyPropertyChanged
             IsUploading = false;
         }
     }
+    
+    private async Task UpdateClipsForDateAsync()
+    {
+        IsLoadingClipsForDate = true;
+        List<Clip> clips = await ClipsRestService.GetClipsForDateAsync(SelectedDateTime);
+        List<User> users = await ClipsRestService.GetAllUsersAsync();
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            Clips.Clear();
+            clips.ForEach(async x =>
+            {
+                BitmapImage image = await ClipsRestService.GetThumbnailForClipAsync(x.Id);
+                User user = users.FirstOrDefault(u => u.Id == x.OwnerId) ?? new User();
+                Clips.Add(new ClipModel(x, image, OpenClipForPlay) { ClipOwner = user });
+            });
+            Rows = (int)Math.Ceiling(clips.Count / 4d);
+        });
+        NoClipsForDate = clips.Count == 0;
+        List<Task> cacheTasks = [];
+        cacheTasks.AddRange(Clips.Select(clip => clip.CacheForPlay()));
+
+        await Task.WhenAll(cacheTasks);
+        IsLoadingClipsForDate = false;
+    }
 
     public async Task OpenSettings(object content)
     {
@@ -327,27 +357,5 @@ public class MainWindowViewModel : INotifyPropertyChanged
         field = value;
         OnPropertyChanged(propertyName);
         return true;
-    }
-
-    private async Task UpdateClipsForDateAsync()
-    {
-        List<Clip> clips = await ClipsRestService.GetClipsForDateAsync(SelectedDateTime);
-        List<User> users = await ClipsRestService.GetAllUsersAsync();
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            Clips.Clear();
-            clips.ForEach(async x =>
-            {
-                BitmapImage image = await ClipsRestService.GetThumbnailForClipAsync(x.Id);
-                User user = users.FirstOrDefault(u => u.Id == x.OwnerId) ?? new User();
-                Clips.Add(new ClipModel(x, image, OpenClipForPlay) { ClipOwner = user });
-            });
-            Rows = (int)Math.Ceiling(clips.Count / 4d);
-        });
-        NoClipsForDate = clips.Count == 0;
-        List<Task> cacheTasks = [];
-        cacheTasks.AddRange(Clips.Select(clip => clip.CacheForPlay()));
-
-        await Task.WhenAll(cacheTasks);
     }
 }
