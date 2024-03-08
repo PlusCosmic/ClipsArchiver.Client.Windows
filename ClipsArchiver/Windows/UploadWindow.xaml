@@ -1,0 +1,53 @@
+<ui:FluentWindow x:Class="ClipsArchiver.Windows.UploadWindow"
+                 x:Name="Window"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:viewModels="clr-namespace:ClipsArchiver.ViewModels"
+             ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+             ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance viewModels:SettingsViewModel}"
+             Height="320" Width="460"
+             d:DesignHeight="320" d:DesignWidth="540">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ui:TitleBar
+            Title="The Clip Archive - Upload Clips"
+            Grid.Row="0">
+            <ui:TitleBar.Icon>
+                <ui:SymbolIcon Symbol="VideoClip24" FontSize="24"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+        <ItemsControl Grid.Row="1"/>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ui:Button Grid.Column="0" Content="Select Clips">
+                <ui:Button.Icon>
+                    <ui:SymbolIcon Symbol="FolderAdd24"/>
+                </ui:Button.Icon>
+            </ui:Button>
+            <ui:Button Grid.Column="2" Content="Upload">
+                <ui:Button.Icon>
+                    <ui:SymbolIcon Symbol="ArrowUpload24"/>
+                </ui:Button.Icon>
+            </ui:Button>
+            <ui:Button Grid.Column="3" Content="Close">
+                <ui:Button.Icon>
+                    <ui:SymbolIcon Symbol="Dismiss24"/>
+                </ui:Button.Icon>
+            </ui:Button>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

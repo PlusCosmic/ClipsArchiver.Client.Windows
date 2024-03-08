@@ -4,7 +4,7 @@ using ClipsArchiver.ViewModels;
 using Microsoft.Win32;
 using Wpf.Ui.Controls;
 
-namespace ClipsArchiver.Views;
+namespace ClipsArchiver.Windows;
 
 public partial class SettingsWindow : FluentWindow
 {
