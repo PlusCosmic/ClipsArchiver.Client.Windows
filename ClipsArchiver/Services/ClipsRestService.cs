@@ -13,7 +13,10 @@ namespace ClipsArchiver.Services;
 public class ClipsRestService
 {
     
-    private static HttpClient _httpClient = new()
+    private static HttpClient _httpClient = new(new HttpClientHandler
+    {
+        MaxConnectionsPerServer = 100
+    })
     {
         BaseAddress = new Uri("http://10.0.0.10:8080"),
     };
@@ -57,33 +60,6 @@ public class ClipsRestService
         fileStream.Close();
         
         return new BitmapImage(new Uri(Path.GetTempPath() + $@"\ClipsArchiver\{clipId}.png"));
-    }
-
-    public static async Task<Uri> DownloadVideoByIdAsync(int clipId)
-    {
-        if (File.Exists(Path.GetTempPath() + $@"ClipsArchiver\{clipId}.mp4"))
-        {
-            return new Uri(Path.GetTempPath() + $@"ClipsArchiver\{clipId}.mp4");
-        }
-        
-        var response = await _httpClient.GetAsync($"clips/download/{clipId}");
-        Log.Debug($"Got response: {response.StatusCode}");
-        response.EnsureSuccessStatusCode();
-        
-        using var resultStream = await response.Content.ReadAsStreamAsync();
-        
-        if (!Directory.Exists(Path.GetTempPath() + $@"\ClipsArchiver"))
-        {
-            Directory.CreateDirectory(Path.GetTempPath() + $@"\ClipsArchiver");
-        }
-        
-        using var fileStream = File.Create(Path.GetTempPath() + $@"\ClipsArchiver\{clipId}.mp4");
-        resultStream.CopyTo(fileStream);
-        
-        resultStream.Close();
-        fileStream.Close();
-        
-        return new Uri(Path.GetTempPath() + $@"ClipsArchiver\{clipId}.mp4");
     }
 
     public static async Task UploadClipsAsync(List<string> clipPaths)

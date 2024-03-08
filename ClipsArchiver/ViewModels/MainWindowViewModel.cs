@@ -1,28 +1,21 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using ClipsArchiver.Entities;
 using ClipsArchiver.Models;
 using ClipsArchiver.Services;
-using ClipsArchiver.Views;
 using CommunityToolkit.Mvvm.Input;
 using LibVLCSharp.Shared;
 using Microsoft.Win32;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
-using Wpf.Ui.Extensions;
 
 namespace ClipsArchiver.ViewModels;
 
-public class MainWindowViewModel : INotifyPropertyChanged
+public class MainWindowViewModel : ViewModelBase
 {
-    public ObservableCollection<ClipModel> Clips { get; set; }
+    public ObservableCollection<ClipViewModel> Clips { get; set; }
 
-    private ClipModel? _selectedClip;
-    public ClipModel? SelectedClip
+    private ClipViewModel? _selectedClip;
+    public ClipViewModel? SelectedClip
     {
         get => _selectedClip; 
         set => SetField(ref _selectedClip, value);
@@ -127,9 +120,9 @@ public class MainWindowViewModel : INotifyPropertyChanged
         set => SetField(ref _playbackSpeed, value);
     }
 
-    private string _currentTimestamp;
+    private string? _currentTimestamp;
 
-    public string CurrentTimestamp
+    public string? CurrentTimestamp
     {
         get => _currentTimestamp;
         set => SetField(ref _currentTimestamp, value);
@@ -186,9 +179,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
     public RelayCommand GoPrevVideoCommand { get; private set; }
     public RelayCommand GoNextVideoCommand { get; private set; }
     public AsyncRelayCommand OpenFileDialogForClipsCommand { get; private set; }
-    public AsyncRelayCommand<ContentPresenter> OpenSettingsCommand { get; private set; }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
 
     public MainWindowViewModel()
     {
@@ -200,11 +190,10 @@ public class MainWindowViewModel : INotifyPropertyChanged
         GoPrevVideoCommand = new RelayCommand(GoPrevVideo);
         GoNextVideoCommand = new RelayCommand(GoNextVideo);
         OpenFileDialogForClipsCommand = new AsyncRelayCommand(GetClipsForUpload);
-        OpenSettingsCommand = new AsyncRelayCommand<ContentPresenter>(OpenSettings);
         SelectedDateTime = DateTime.Now.Hour < 4 ? DateTime.Now.AddDays(-1) : DateTime.Now;
-        Clips = new ObservableCollection<ClipModel>();
-        LibVlc = new LibVLC();
-        MediaPlayer = new MediaPlayer(LibVlc);
+        Clips = new ObservableCollection<ClipViewModel>();
+        _libVlc = new LibVLC();
+        _mediaPlayer = new MediaPlayer(LibVlc);
         VideoVolume = 100;
         //Cache users for clips to use
         Task.Run(ClipsRestService.GetAllUsersAsync);
@@ -239,11 +228,17 @@ public class MainWindowViewModel : INotifyPropertyChanged
     {
         return true;
     }
-    
-    public void OpenClipForPlay(ClipModel model)
+
+    private void OpenClipForPlay(ClipViewModel viewModel)
     {
-        SelectedClip = model;
+        SelectedClip = viewModel;
+        
+        if (SelectedClip.VideoUri is null)
+        {
+            return;
+        }
         ShowingVideo = true;
+        
         MediaPlayer.Media = new Media(LibVlc, SelectedClip.VideoUri);
         MediaPlayer.TimeChanged += MediaPlayerOnTimeChanged;
         PlayVideo(true);
@@ -313,7 +308,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
     
     private async Task UpdateClipsForDateAsync()
     {
-        IsLoadingClipsForDate = true;
         List<Clip> clips = await ClipsRestService.GetClipsForDateAsync(SelectedDateTime);
         List<User> users = await ClipsRestService.GetAllUsersAsync();
         Application.Current.Dispatcher.Invoke(() =>
@@ -323,39 +317,10 @@ public class MainWindowViewModel : INotifyPropertyChanged
             {
                 BitmapImage image = await ClipsRestService.GetThumbnailForClipAsync(x.Id);
                 User user = users.FirstOrDefault(u => u.Id == x.OwnerId) ?? new User();
-                Clips.Add(new ClipModel(x, image, OpenClipForPlay) { ClipOwner = user });
+                Clips.Add(new ClipViewModel(x, OpenClipForPlay) { ClipOwner = user });
             });
             Rows = (int)Math.Ceiling(clips.Count / 4d);
         });
         NoClipsForDate = clips.Count == 0;
-        List<Task> cacheTasks = [];
-        cacheTasks.AddRange(Clips.Select(clip => clip.CacheForPlay()));
-
-        await Task.WhenAll(cacheTasks);
-        IsLoadingClipsForDate = false;
-    }
-
-    public async Task OpenSettings(object content)
-    {
-        ContentDialogService dialogService = new();
-        ContentDialog contentDialog = new();
-        contentDialog.Title = "Settings";
-        contentDialog.ContentPresenter = content as ContentPresenter;
-        
-        var result = await dialogService.ShowAsync(contentDialog, new CancellationToken());
-        
-    }
-    
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }

@@ -13,7 +13,7 @@ public partial class ClipCard : UserControl
 
     private void PlayIconPressed(object sender, MouseButtonEventArgs e)
     {
-        if (DataContext is not ClipModel model)
+        if (DataContext is not ClipViewModel model)
         {
             return;
         }

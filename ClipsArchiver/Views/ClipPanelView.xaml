@@ -39,19 +39,19 @@
             
         </Grid>
         <ScrollViewer Grid.Row="1" Visibility="{Binding !NoClipsForDate, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,20,0,0">
-            <ItemsControl ItemsSource="{Binding Clips}">
-                <ItemsControl.ItemsPanel>
+            <ListView ItemsSource="{Binding Clips}" SelectedItem="{Binding SelectedClip}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionMode="Single">
+                <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel />
                     </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+                </ListView.ItemsPanel>
             
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <controls:ClipCard Margin="5"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            </ListView>
         </ScrollViewer>
         <ui:TextBlock Grid.Row="1" VerticalAlignment="Center" 
                       HorizontalAlignment="Center" 
