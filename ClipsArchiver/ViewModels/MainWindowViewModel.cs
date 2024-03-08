@@ -164,6 +164,14 @@ public class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    private bool _isUploading;
+
+    public bool IsUploading
+    {
+        get => _isUploading;
+        set => SetField(ref _isUploading, value);
+    }
+
     public RelayCommand GoBackDayCommand { get; private set; }
     public RelayCommand GoForwardDayCommand { get; private set; }
     public RelayCommand GoBackCommand { get; private set; }
@@ -171,7 +179,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
     public RelayCommand PauseVideoCommand { get; private set; }
     public RelayCommand GoPrevVideoCommand { get; private set; }
     public RelayCommand GoNextVideoCommand { get; private set; }
-    public RelayCommand OpenFileDialogForClipsCommand { get; private set; }
+    public AsyncRelayCommand OpenFileDialogForClipsCommand { get; private set; }
     public AsyncRelayCommand<ContentPresenter> OpenSettingsCommand { get; private set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -185,7 +193,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
         PauseVideoCommand = new RelayCommand(PauseVideo);
         GoPrevVideoCommand = new RelayCommand(GoPrevVideo);
         GoNextVideoCommand = new RelayCommand(GoNextVideo);
-        OpenFileDialogForClipsCommand = new RelayCommand(GetClipsForUpload);
+        OpenFileDialogForClipsCommand = new AsyncRelayCommand(GetClipsForUpload);
         OpenSettingsCommand = new AsyncRelayCommand<ContentPresenter>(OpenSettings);
         SelectedDateTime = DateTime.Now.Hour < 4 ? DateTime.Now.AddDays(-1) : DateTime.Now;
         Clips = new ObservableCollection<ClipModel>();
@@ -282,7 +290,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
         
     }
 
-    public void GetClipsForUpload()
+    public async Task GetClipsForUpload()
     {
         Settings settings = SettingsService.GetSettings();
         var fileDialog = new OpenFileDialog();
@@ -291,7 +299,9 @@ public class MainWindowViewModel : INotifyPropertyChanged
         fileDialog.DefaultDirectory = settings.ClipsPath;
         if (fileDialog.ShowDialog() ?? false)
         {
-            ClipsRestService.UploadClipsAsync(new List<string>(fileDialog.FileNames));
+            IsUploading = true;
+            await ClipsRestService.UploadClipsAsync(new List<string>(fileDialog.FileNames));
+            IsUploading = false;
         }
     }
 

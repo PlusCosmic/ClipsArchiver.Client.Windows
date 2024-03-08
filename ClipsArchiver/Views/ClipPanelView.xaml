@@ -6,12 +6,15 @@
              xmlns:viewModels="clr-namespace:ClipsArchiver.ViewModels"
              xmlns:controls="clr-namespace:ClipsArchiver.Controls"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:fa="http://schemas.fontawesome.io/icons/"
              xmlns:views="clr-namespace:ClipsArchiver.Views"
+             xmlns:converters="clr-namespace:NKristek.Wpf.Converters;assembly=NKristek.Wpf.Converters"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:BoolToInverseVisibilityConverter x:Key="BoolToInverseVisibilityConverter"/>
     </UserControl.Resources>
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -29,11 +32,12 @@
             <Button Content="Go Back" Command="{Binding GoBackDayCommand}" HorizontalAlignment="Right"/>
             <DatePicker Grid.Column="1" SelectedDate="{Binding SelectedDateTime}" Margin="10,0"/>
             <Button Grid.Column="2" Content="Go Forward" Command="{Binding GoForwardDayCommand}" HorizontalAlignment="Left"/>
-            <ui:SymbolIcon Grid.Column="3" Symbol="ArrowUpload24" FontSize="24" Margin="12, 0">
+            <ui:SymbolIcon Grid.Column="3" Symbol="ArrowUpload24" FontSize="24" Margin="12, 0" Visibility="{Binding IsUploading, Converter={StaticResource BoolToInverseVisibilityConverter}}">
                 <ui:SymbolIcon.InputBindings>
-                    <MouseBinding Gesture="LeftClick" Command="{Binding OpenFileDialogForClipsCommand}"></MouseBinding>
+                    <MouseBinding Gesture="LeftClick" Command="{Binding OpenFileDialogForClipsCommand}"/>
                 </ui:SymbolIcon.InputBindings>
             </ui:SymbolIcon>
+            <fa:ImageAwesome Grid.Column="3" Icon="Refresh" Spin="True" Height="24" Width="24" Margin="12, 0" Foreground="White" Visibility="{Binding IsUploading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <ui:SymbolIcon Grid.Column="4" Symbol="Settings24" FontSize="24" Margin="12, 0" PreviewMouseDown="SettingsIconPressed"/>
             
         </Grid>
