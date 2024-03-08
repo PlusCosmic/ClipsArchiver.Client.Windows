@@ -3,46 +3,57 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:ClipsArchiver.Controls"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:models="clr-namespace:ClipsArchiver.Models"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:converters="clr-namespace:NKristek.Wpf.Converters;assembly=NKristek.Wpf.Converters"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
-             d:DataContext="{d:DesignInstance models:ClipModel}">
+             d:DataContext="{d:DesignInstance models:ClipViewModel}">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:BoolToInverseVisibilityConverter x:Key="BoolToInverseVisibilityConverter"/>
     </UserControl.Resources>
-    <Border CornerRadius="5" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="10">
-        <Grid Height="256" Width="256">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="144"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-                <Border CornerRadius="5">
-                    <Border.Background>
-                        <ImageBrush Stretch="Fill" ImageSource="{Binding Thumbnail}"/>
-                    </Border.Background>
-                    <Grid>
-                        <ui:SymbolIcon Symbol="Play24" Foreground="White" 
-                                       HorizontalAlignment="Center" 
-                                       VerticalAlignment="Center" 
-                                       Visibility="{Binding IsCachedForPlay, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                       PreviewMouseDown="PlayIconPressed"/>
-                        <ui:ProgressRing Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center" IsIndeterminate="True" Visibility="{Binding IsCachedForPlay, Converter={StaticResource BoolToInverseVisibilityConverter}}"/>
-                    </Grid>
-                </Border>
-                <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="{Binding Duration}" Margin="3" Padding="3, 0" Background="Black" Foreground="White"/>
-            </Grid>
+    <Border CornerRadius="5" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+        <Grid>
+            <Grid Height="164" Width="256" Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="144"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0" Margin="0,0,0,12">
+                    <Border CornerRadius="5">
+                        <Border.Background>
+                            <ImageBrush Stretch="Fill" ImageSource="{Binding Thumbnail}"/>
+                        </Border.Background>
+                        <Grid>
+                            <ui:SymbolIcon Symbol="Play24" Foreground="White" 
+                                           HorizontalAlignment="Center" 
+                                           VerticalAlignment="Center" 
+                                           PreviewMouseDown="PlayIconPressed"/>
+                        </Grid>
+                    </Border>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="{Binding Duration}" Margin="3" Padding="3, 0" Background="#90000000" Foreground="White"/>
+                </Grid>
         
-            <TextBlock Grid.Row="1" Text="{Binding Clip.Filename}"/>
-            <StackPanel Grid.Row="2" Orientation="Horizontal">
-                <TextBlock Text="{Binding ClipOwner.Name}"/>
-                <TextBlock Text="{Binding Clip.CreatedAt}"/>
-            </StackPanel>
+                <TextBlock Grid.Column="0" Grid.Row="1" Text="{Binding ClipName, FallbackValue={x:Static system:String.Empty}}"/>
+                <ui:InfoBadge Grid.Column="1" Grid.Row="1"
+                              VerticalAlignment="Top" Margin="4,0,0,0"
+                              HorizontalAlignment="Left"
+                              Width="6"
+                              Height="6"
+                              CornerRadius="30"
+                              Severity="Critical"
+                              Style="{DynamicResource IconInfoBadgeStyle}"
+                              Visibility="{Binding IsWatched, Converter={StaticResource BoolToInverseVisibilityConverter}}"
+                              Icon="{ui:SymbolIcon Alert16}"/>
+                <TextBlock Grid.Column="2" Grid.Row="1" Text="{Binding UploadedBy, FallbackValue={x:Static system:String.Empty}}"/>
+            </Grid>
         </Grid>
     </Border>
 </UserControl>

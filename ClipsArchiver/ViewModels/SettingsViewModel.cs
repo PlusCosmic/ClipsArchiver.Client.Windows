@@ -1,6 +1,4 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using ClipsArchiver.Entities;
 using ClipsArchiver.Services;
 using CommunityToolkit.Mvvm.Input;
@@ -10,7 +8,7 @@ using Wpf.Ui.Controls;
 
 namespace ClipsArchiver.ViewModels;
 
-public class SettingsViewModel : INotifyPropertyChanged
+public class SettingsViewModel : ViewModelBase
 {
     private User? _selectedUser;
     public User? SelectedUser
@@ -19,16 +17,16 @@ public class SettingsViewModel : INotifyPropertyChanged
         set => SetField(ref _selectedUser, value);
     }
 
-    private ObservableCollection<User> _availableUsers;
+    private ObservableCollection<User>? _availableUsers;
 
-    public ObservableCollection<User> AvailableUsers
+    public ObservableCollection<User>? AvailableUsers
     {
         get => _availableUsers;
         set => SetField(ref _availableUsers, value);
     }
 
-    private string _clipsPath;
-    public string ClipsPath
+    private string? _clipsPath;
+    public string? ClipsPath
     {
         get => _clipsPath;
         set => SetField(ref _clipsPath, value);
@@ -70,29 +68,14 @@ public class SettingsViewModel : INotifyPropertyChanged
         mgr.ApplyUpdatesAndRestart(newVersion);
     }
 
-    private void SaveSettings(FluentWindow window)
+    private void SaveSettings(FluentWindow? window)
     {
         Settings settings = new()
         {
             UserId = SelectedUser?.Id ?? 0,
-            ClipsPath = ClipsPath
+            ClipsPath = ClipsPath ?? string.Empty
         };
         SettingsService.SaveSettings(settings);
-        window.Close();
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
+        window?.Close();
     }
 }

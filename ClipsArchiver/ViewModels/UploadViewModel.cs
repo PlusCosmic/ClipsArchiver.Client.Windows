@@ -1,6 +1,6 @@
 namespace ClipsArchiver.ViewModels;
 
-public class UploadViewModel
+public class UploadViewModel : ViewModelBase
 {
     
 }
