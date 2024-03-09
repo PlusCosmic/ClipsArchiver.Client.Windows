@@ -12,7 +12,6 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:BoolToInverseVisibilityConverter x:Key="BoolToInverseVisibilityConverter"/>
-        <converters:ObjectToStringEqualsParameterToVisibilityConverter x:Key="StringToVisConverter"/>
     </UserControl.Resources>
     <Border CornerRadius="5" Padding="5">
         <Border.Style>
