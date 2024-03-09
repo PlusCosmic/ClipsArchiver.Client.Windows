@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows.Media.Imaging;
 using ClipsArchiver.Entities;
@@ -62,6 +63,13 @@ public class ClipViewModel : ViewModelBase
         set => SetField(ref _isWatched, value);
     }
 
+    private ObservableCollection<string> _tags;
+    public ObservableCollection<string> Tags
+    {
+        get => _tags;
+        set => SetField(ref _tags, value);
+    }
+
     public string ClipName => $"Clip #{Clip.Id}";
     public string UploadedBy => $"Uploaded by: {ClipOwner?.Name}";
     
@@ -76,6 +84,8 @@ public class ClipViewModel : ViewModelBase
         _openClipAction = openClipAction;
         _clipInfo = LocalDbService.GetInfoForClipId(clip.Id);
         IsWatched = _clipInfo.Watched;
+        _tags = new ObservableCollection<string>();
+        clip.Tags?.ForEach(t => Tags.Add(t));
     }
     
     private void ShowVideo(ClipViewModel? model)
@@ -93,5 +103,11 @@ public class ClipViewModel : ViewModelBase
         }
         
         _openClipAction.Invoke(model);
+    }
+
+    public async Task SaveClipAsync()
+    {
+        _clip.Tags = Tags.ToList();
+        await ClipsRestService.UpdateClipAsync(_clip);
     }
 }
