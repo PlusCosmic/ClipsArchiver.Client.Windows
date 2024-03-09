@@ -47,7 +47,7 @@
         <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
             <ui:Button Content="Save" Margin="12" Command="{Binding SaveSettingsCommand}" 
                        CommandParameter="{Binding RelativeSource={ RelativeSource FindAncestor, AncestorType={ x:Type Window}}}"/>
-            <ui:Button Content="Exit" Margin="12" Click="CloseButtonPressed"/>
+            <ui:Button Content="Close" Margin="12" Click="CloseButtonPressed"/>
         </StackPanel>
     </Grid>
 </ui:FluentWindow>
