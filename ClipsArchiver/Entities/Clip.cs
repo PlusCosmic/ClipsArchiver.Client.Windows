@@ -12,6 +12,7 @@ public class Clip
     public bool IsProcessed { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public int Duration { get; set; }
-    public string VideoUri { get; set; }
-    public string ThumbnailUri { get; set; }
+    public List<string> Tags { get; set; } = new();
+    public string VideoUri { get; set; } = string.Empty;
+    public string ThumbnailUri { get; set; } = string.Empty;
 }

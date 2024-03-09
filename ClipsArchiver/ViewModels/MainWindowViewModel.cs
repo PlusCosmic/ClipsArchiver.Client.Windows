@@ -17,7 +17,7 @@ public class MainWindowViewModel : ViewModelBase
     private ClipViewModel? _selectedClip;
     public ClipViewModel? SelectedClip
     {
-        get => _selectedClip; 
+        get => _selectedClip;
         set => SetField(ref _selectedClip, value);
     }
 
@@ -171,6 +171,13 @@ public class MainWindowViewModel : ViewModelBase
         set => SetField(ref _isLoadingClipsForDate, value);
     }
 
+    private ObservableCollection<string> _allTags;
+    public ObservableCollection<string> AllTags
+    {
+        get => _allTags;
+        set => SetField(ref _allTags, value);
+    }
+
     public RelayCommand GoBackDayCommand { get; private set; }
     public RelayCommand GoForwardDayCommand { get; private set; }
     public RelayCommand GoBackCommand { get; private set; }
@@ -178,6 +185,8 @@ public class MainWindowViewModel : ViewModelBase
     public RelayCommand PauseVideoCommand { get; private set; }
     public RelayCommand GoPrevVideoCommand { get; private set; }
     public RelayCommand GoNextVideoCommand { get; private set; }
+    public AsyncRelayCommand<string> AddTagToSelectedClipCommand { get; private set; }
+    public AsyncRelayCommand<string> RemoveTagFromSelectedClipCommand { get; private set; }
     public AsyncRelayCommand OpenFileDialogForClipsCommand { get; private set; }
 
     public MainWindowViewModel()
@@ -189,14 +198,22 @@ public class MainWindowViewModel : ViewModelBase
         PauseVideoCommand = new RelayCommand(PauseVideo);
         GoPrevVideoCommand = new RelayCommand(GoPrevVideo);
         GoNextVideoCommand = new RelayCommand(GoNextVideo);
+        AddTagToSelectedClipCommand = new AsyncRelayCommand<string>(AddTagToSelectedClip);
+        RemoveTagFromSelectedClipCommand = new AsyncRelayCommand<string>(RemoveTagFromSelectedClip);
         OpenFileDialogForClipsCommand = new AsyncRelayCommand(GetClipsForUpload);
         SelectedDateTime = DateTime.Now.Hour < 4 ? DateTime.Now.AddDays(-1) : DateTime.Now;
         Clips = new ObservableCollection<ClipViewModel>();
+        AllTags = new ObservableCollection<string>();
         _libVlc = new LibVLC();
         _mediaPlayer = new MediaPlayer(LibVlc);
         VideoVolume = 100;
         //Cache users for clips to use
         Task.Run(ClipsRestService.GetAllUsersAsync);
+        Task.Run(async() =>
+        {
+            List<Tag> allTags = await ClipsRestService.GetAllTagsAsync();
+            allTags.ForEach(t => AllTags.Add(t.Name));
+        });
     }
     
     private void MediaPlayerOnTimeChanged(object? sender, MediaPlayerTimeChangedEventArgs e)
@@ -322,5 +339,23 @@ public class MainWindowViewModel : ViewModelBase
             Rows = (int)Math.Ceiling(clips.Count / 4d);
         });
         NoClipsForDate = clips.Count == 0;
+    }
+
+    private async Task AddTagToSelectedClip(string? tag)
+    {
+        if(tag is not null && SelectedClip is not null)
+        {
+            SelectedClip.Tags.Add(tag);
+            await SelectedClip.SaveClipAsync();
+        }
+    }
+
+    private async Task RemoveTagFromSelectedClip(string? tag)
+    {
+        if(tag is not null && SelectedClip is not null)
+        {
+            SelectedClip.Tags.Remove(tag);
+            await SelectedClip.SaveClipAsync();
+        }
     }
 }

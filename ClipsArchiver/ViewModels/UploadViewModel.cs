@@ -22,10 +22,10 @@ public class UploadViewModel : ViewModelBase
     
     public UploadViewModel()
     {
+        _unsavedClipModels = new ObservableCollection<UnsavedClipModel>();
         OpenFileDialogCommand = new RelayCommand(OpenFileDialog);
         UploadClipsCommand = new AsyncRelayCommand(UploadClips);
         CloseWindowCommand = new RelayCommand<FluentWindow>(CloseWindow);
-        UnsavedClipModels = new ObservableCollection<UnsavedClipModel>();
     }
 
     private void OpenFileDialog()
@@ -55,7 +55,7 @@ public class UploadViewModel : ViewModelBase
         await Task.WhenAll(tasks);
     }
 
-    private void CloseWindow(FluentWindow window)
+    private void CloseWindow(FluentWindow? window)
     {
         window?.Close();
     }

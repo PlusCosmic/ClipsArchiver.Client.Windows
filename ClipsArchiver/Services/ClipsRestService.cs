@@ -1,6 +1,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Windows.Media.Imaging;
 using ClipsArchiver.Constants;
 using ClipsArchiver.Entities;
@@ -126,6 +127,17 @@ public class ClipsRestService
         });
     }
 
+    public static async Task<List<Tag>> GetAllTagsAsync()
+    {
+        Log.Debug($"Getting all tags");
+        using HttpResponseMessage response = await _httpClient.GetAsync("tags");
+        Log.Debug($"Got response: {response.StatusCode}");
+        response.EnsureSuccessStatusCode();
+
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<List<Tag>>(jsonResponse) ?? [];
+    }
+
     public static async Task<QueueEntry?> GetQueueEntryByClipIdAsync(int clipId)
     {
         Log.Debug($"Getting queue entry for clip with id: {clipId}");
@@ -146,5 +158,12 @@ public class ClipsRestService
 
         response.EnsureSuccessStatusCode();
         return true;
+    }
+
+    public static async Task UpdateClipAsync(Clip clip)
+    {
+        Log.Debug($"Updating clip with id: {clip.Id}");
+        using HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"clips/{clip.Id}", clip);
+        response.EnsureSuccessStatusCode();
     }
 }
