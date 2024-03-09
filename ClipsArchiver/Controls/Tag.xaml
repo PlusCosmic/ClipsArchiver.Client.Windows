@@ -1,0 +1,33 @@
+<UserControl x:Class="ClipsArchiver.Controls.Tag"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:converters="clr-namespace:ClipsArchiver.Converters"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance system:String}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <converters:TagNameToColorBrushConverter x:Key="BrushConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Border CornerRadius="5" Padding="5" Background="{Binding Converter={StaticResource BrushConverter}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding }" VerticalAlignment="Center" Margin="5"/>
+                <ui:SymbolIcon Grid.Column="1" Symbol="Dismiss16" Margin="5" Cursor="Hand">
+                    <ui:SymbolIcon.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" 
+                                      Command="{Binding Path=DataContext.RemoveTagFromSelectedClipCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                      CommandParameter="{Binding }"/>
+                    </ui:SymbolIcon.InputBindings>
+                </ui:SymbolIcon>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

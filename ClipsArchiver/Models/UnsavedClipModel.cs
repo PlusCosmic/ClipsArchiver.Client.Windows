@@ -101,7 +101,7 @@ public class UnsavedClipModel() : ViewModelBase
     private async void PollQueueStatus(object? sender, ElapsedEventArgs e)
     {
         QueueEntry? queueEntry = await ClipsRestService.GetQueueEntryByClipIdAsync(_clipId);
-        if (QueueEntry is null)
+        if (queueEntry is null)
         {
             return;
         }
