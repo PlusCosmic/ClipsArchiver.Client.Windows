@@ -30,14 +30,14 @@
                         <MultiDataTrigger.Conditions>
                             <Condition Binding="{Binding FailedUpload}" Value="True"/>
                         </MultiDataTrigger.Conditions>
-                        <Setter Property="Background" Value="{DynamicResource SystemFillColorCriticalBackgroundBrush}"></Setter>
+                        <Setter Property="Background" Value="{DynamicResource SystemFillColorCriticalBrush}"></Setter>
                     </MultiDataTrigger>
                     <MultiDataTrigger>
                         <MultiDataTrigger.Conditions>
                             <Condition Binding="{Binding HasStartedUploading}" Value="True"/>
                             <Condition Binding="{Binding IsFinishedUploading}" Value="True"/>
                         </MultiDataTrigger.Conditions>
-                        <Setter Property="Background" Value="{DynamicResource SystemFillColorSuccessBackgroundBrush}"></Setter>
+                        <Setter Property="Background" Value="{DynamicResource SystemFillColorSuccessBrush}"></Setter>
                     </MultiDataTrigger>
                 </Style.Triggers>
             </Style>
