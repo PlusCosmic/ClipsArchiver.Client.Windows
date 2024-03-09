@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Reflection;
 using ClipsArchiver.Entities;
 using ClipsArchiver.Services;
 using CommunityToolkit.Mvvm.Input;
@@ -32,6 +33,20 @@ public class SettingsViewModel : ViewModelBase
         set => SetField(ref _clipsPath, value);
     }
 
+    private string _updateStatus;
+    public string UpdateStatus
+    {
+        get => _updateStatus;
+        set => SetField(ref _updateStatus, value);
+    }
+
+    private string _currentVersion;
+    public string CurrentVersion
+    {
+        get => _currentVersion;
+        set => SetField(ref _currentVersion, value);
+    }
+
     public AsyncRelayCommand CheckForUpdatesCommand { get; private set; }
     public RelayCommand<FluentWindow> SaveSettingsCommand { get; private set; }
     
@@ -39,6 +54,7 @@ public class SettingsViewModel : ViewModelBase
     {
         CheckForUpdatesCommand = new AsyncRelayCommand(CheckForUpdatesAsync);
         SaveSettingsCommand = new RelayCommand<FluentWindow>(SaveSettings);
+        CurrentVersion = "v" + Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString() ?? "1.0.0";
         Task.Run(InitAsync);
     }
 
@@ -57,13 +73,18 @@ public class SettingsViewModel : ViewModelBase
         var mgr = new UpdateManager(new GithubSource("https://github.com/PlusCosmic/ClipsArchiver.Client.Windows", null, false));
 
         // check for new version
+        UpdateStatus = "Checking for updates...";
         var newVersion = await mgr.CheckForUpdatesAsync();
-        if (newVersion == null)
+        if (newVersion == null){
+            UpdateStatus = "No updates available";
             return; // no update available
+        }
 
+        UpdateStatus = "Downloading new version...";
         // download new version
         await mgr.DownloadUpdatesAsync(newVersion);
 
+        UpdateStatus = "Installing new version...";
         // install new version and restart app
         mgr.ApplyUpdatesAndRestart(newVersion);
     }
