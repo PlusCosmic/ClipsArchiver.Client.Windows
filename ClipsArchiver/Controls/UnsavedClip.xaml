@@ -16,20 +16,20 @@
     <Border CornerRadius="5" Padding="5">
         <Border.Style>
             <Style TargetType="Border">
-                <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}"></Setter>
+                <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}"/>
                 <Style.Triggers>
                     <MultiDataTrigger>
                         <MultiDataTrigger.Conditions>
                             <Condition Binding="{Binding HasStartedUploading}" Value="True"/>
                             <Condition Binding="{Binding IsFinishedUploading}" Value="False"/>
                         </MultiDataTrigger.Conditions>
-                        <Setter Property="Background" Value="{DynamicResource SystemFillColorAttentionBackgroundBrush}"></Setter>
+                        <Setter Property="Background" Value="{DynamicResource SystemFillColorAttentionBackgroundBrush}"/>
                     </MultiDataTrigger>
                     <MultiDataTrigger>
                         <MultiDataTrigger.Conditions>
                             <Condition Binding="{Binding FailedUpload}" Value="True"/>
                         </MultiDataTrigger.Conditions>
-                        <Setter Property="Background" Value="{DynamicResource SystemFillColorCriticalBrush}"></Setter>
+                        <Setter Property="Background" Value="{DynamicResource SystemFillColorCriticalBrush}"/>
                     </MultiDataTrigger>
                     <MultiDataTrigger>
                         <MultiDataTrigger.Conditions>

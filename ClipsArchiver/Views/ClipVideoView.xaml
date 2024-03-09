@@ -52,6 +52,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/> 
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Grid Grid.Column="0">
@@ -73,8 +74,12 @@
                     <ui:SymbolIcon Symbol="SpeakerMute24" FontSize="24" Margin="12, 0"/>
                 </Grid>
                 <Slider Grid.Column="2" Width="40" Minimum="0" Maximum="100" Value="{Binding VideoVolume}"/>
-                <ui:SymbolIcon Grid.Column="5" Symbol="Previous24" FontSize="24" Margin="12, 0"/>
-                <ui:SymbolIcon Grid.Column="6" Symbol="Next24" FontSize="24" Margin="12, 0"/>
+                <Grid Grid.Column="4">
+                    <ui:SymbolIcon Symbol="AnimalRabbit24" FontSize="24" Margin="12, 0"/>
+                </Grid>
+                <Slider Grid.Column="5" Width="40" Minimum="40" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Value="{Binding PlaybackSpeed}"/>
+                <ui:SymbolIcon Grid.Column="6" Symbol="Previous24" FontSize="24" Margin="12, 0"/>
+                <ui:SymbolIcon Grid.Column="7" Symbol="Next24" FontSize="24" Margin="12, 0"/>
             </Grid>
         </Grid>
     </Grid>
