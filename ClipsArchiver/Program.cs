@@ -24,6 +24,7 @@ public class Program
             app.Run();
         } catch (Exception ex) {
             Log.Fatal(ex, "Fatal Exception");
+            MessageBox.Show(ex.Message);
         }
     }
 }
