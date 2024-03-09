@@ -16,7 +16,6 @@
     
     <ItemGroup>
       <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-      <PackageReference Include="FontAwesome.WPF" Version="4.7.0.9" />
       <PackageReference Include="LazyCache" Version="2.4.0" />
       <PackageReference Include="LibVLCSharp" Version="3.8.2" />
       <PackageReference Include="LibVLCSharp.WPF" Version="3.8.2" />
