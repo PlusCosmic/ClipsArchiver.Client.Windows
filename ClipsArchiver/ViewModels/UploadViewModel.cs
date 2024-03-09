@@ -46,10 +46,13 @@ public class UploadViewModel : ViewModelBase
 
     private async Task UploadClips()
     {
+        List<Task> tasks = new();
         foreach (var unsavedClipModel in UnsavedClipModels)
         {
-            await unsavedClipModel.UploadClipAsync();
+            tasks.Add(unsavedClipModel.UploadClipAsync());
         }
+
+        await Task.WhenAll(tasks);
     }
 
     private void CloseWindow(FluentWindow window)
