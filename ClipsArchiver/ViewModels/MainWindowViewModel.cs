@@ -317,7 +317,7 @@ public class MainWindowViewModel : ViewModelBase
             {
                 BitmapImage image = await ClipsRestService.GetThumbnailForClipAsync(x.Id);
                 User user = users.FirstOrDefault(u => u.Id == x.OwnerId) ?? new User();
-                Clips.Add(new ClipViewModel(x, OpenClipForPlay) { ClipOwner = user });
+                Clips.Add(new ClipViewModel(OpenClipForPlay, x) { ClipOwner = user });
             });
             Rows = (int)Math.Ceiling(clips.Count / 4d);
         });
