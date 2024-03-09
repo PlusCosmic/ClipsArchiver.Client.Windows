@@ -2,7 +2,7 @@ namespace ClipsArchiver.Entities;
 
 public class Settings
 {
-    public string ClipsPath { get; set; }
+    public string ClipsPath { get; set; } = string.Empty;
     public int UserId { get; set; }
 
     public static Settings GetDefaultSettings()

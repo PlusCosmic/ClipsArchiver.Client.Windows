@@ -12,7 +12,7 @@ public class UnsavedClipModel() : ViewModelBase
 {
     private Timer? _timer;
     private int _clipId;
-    private readonly string _localFilePath;
+    private readonly string _localFilePath = string.Empty;
     
     private QueueEntry? _queueEntry;
     public QueueEntry? QueueEntry
@@ -21,14 +21,14 @@ public class UnsavedClipModel() : ViewModelBase
         set => SetField(ref _queueEntry, value);
     }
 
-    private string _localFilename;
+    private string _localFilename = string.Empty;
     public string LocalFilename
     {
         get => _localFilename;
         set => SetField(ref _localFilename, value);
     }
 
-    private string _status;
+    private string _status = String.Empty;
     public string Status
     {
         get => _status;
@@ -100,7 +100,11 @@ public class UnsavedClipModel() : ViewModelBase
 
     private async void PollQueueStatus(object? sender, ElapsedEventArgs e)
     {
-        QueueEntry queueEntry = await ClipsRestService.GetQueueEntryByClipIdAsync(_clipId);
+        QueueEntry? queueEntry = await ClipsRestService.GetQueueEntryByClipIdAsync(_clipId);
+        if (QueueEntry is null)
+        {
+            return;
+        }
         QueueEntry = queueEntry;
         Status = queueEntry?.Status ?? "";
         if (queueEntry?.Status == "finished")
