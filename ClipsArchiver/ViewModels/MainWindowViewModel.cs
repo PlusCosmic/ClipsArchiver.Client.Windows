@@ -117,7 +117,13 @@ public class MainWindowViewModel : ViewModelBase
     public double PlaybackSpeed
     {
         get => _playbackSpeed;
-        set => SetField(ref _playbackSpeed, value);
+        set
+        {
+            if(SetField(ref _playbackSpeed, value))
+            {
+                MediaPlayer.SetRate((float)PlaybackSpeed / 100);
+            }
+        }
     }
 
     private string? _currentTimestamp;
@@ -207,6 +213,7 @@ public class MainWindowViewModel : ViewModelBase
         _libVlc = new LibVLC();
         _mediaPlayer = new MediaPlayer(LibVlc);
         VideoVolume = 100;
+        PlaybackSpeed = 100;
         //Cache users for clips to use
         Task.Run(ClipsRestService.GetAllUsersAsync);
         Task.Run(async() =>

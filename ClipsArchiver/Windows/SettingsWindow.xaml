@@ -35,6 +35,7 @@
             </ui:TitleBar.Icon>
         </ui:TitleBar>
         <ui:Button Grid.Row="1" Grid.Column="0" Content="Check for updates" Margin="12" Command="{Binding CheckForUpdatesCommand}"/>
+        <ui:TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding UpdateStatus}"/>
         <ui:TextBlock Grid.Row="2" Grid.Column="0" Text="Set clips directory:" Margin="12" VerticalAlignment="Center"/>
         <ui:TextBox Grid.Row="2" Grid.Column="1" IconPlacement="Right" Margin="12" Text="{Binding ClipsPath}">
             <ui:TextBox.Icon>
@@ -44,7 +45,8 @@
         <ui:TextBlock Grid.Row="3" Grid.Column="0" Text="Set user id:" Margin="12" VerticalAlignment="Center"/>
         <ComboBox Grid.Row="3" Grid.Column="1" Margin="12" ItemsSource="{Binding AvailableUsers}" SelectedItem="{Binding SelectedUser}"/>
         <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <ui:Button Content="Save" Margin="12" Command="{Binding SaveSettingsCommand}" CommandParameter="{Binding RelativeSource={ RelativeSource FindAncestor, AncestorType={ x:Type Window}}}"/>
+            <ui:Button Content="Save" Margin="12" Command="{Binding SaveSettingsCommand}" 
+                       CommandParameter="{Binding RelativeSource={ RelativeSource FindAncestor, AncestorType={ x:Type Window}}}"/>
             <ui:Button Content="Exit" Margin="12" Click="CloseButtonPressed"/>
         </StackPanel>
     </Grid>
