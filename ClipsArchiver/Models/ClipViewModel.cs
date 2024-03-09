@@ -26,7 +26,7 @@ public class ClipViewModel : ViewModelBase
         get => _clip;
         set => SetField(ref _clip, value);
     }
-
+    
     private double DurationMinutes => Math.Floor(Clip.Duration / 60d);
     private double DurationSeconds => Clip.Duration % 60d;
     public string Duration
@@ -67,7 +67,7 @@ public class ClipViewModel : ViewModelBase
     
     public RelayCommand<ClipViewModel> ShowVideoCommand { get; private set; }
     
-    public ClipViewModel(Clip clip, Action<ClipViewModel> openClipAction)
+    public ClipViewModel(Action<ClipViewModel> openClipAction, Clip clip)
     {
         _clip = clip;
         _videoUri = new Uri(clip.VideoUri);

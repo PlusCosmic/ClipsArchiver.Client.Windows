@@ -15,7 +15,6 @@ public partial class ClipPanelView : UserControl
     private void SettingsIconPressed(object sender, MouseButtonEventArgs e)
     {
         SettingsWindow window = new();
-        window.ShowInTaskbar = false;
         window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         window.Show();
     }
@@ -23,7 +22,6 @@ public partial class ClipPanelView : UserControl
     private void UploadIconPressed(object sender, MouseButtonEventArgs e)
     {
         UploadWindow window = new();
-        window.ShowInTaskbar = false;
         window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         window.Show();
     }
