@@ -1,4 +1,7 @@
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Windows;
+using ClipsArchiver.Entities;
 using ClipsArchiver.Models;
 using ClipsArchiver.Services;
 using CommunityToolkit.Mvvm.Input;
@@ -58,5 +61,13 @@ public class UploadViewModel : ViewModelBase
     private void CloseWindow(FluentWindow? window)
     {
         window?.Close();
+    }
+
+    public async Task AddNewClipAndUploadAsync(string filename)
+    {
+        UnsavedClipModel model = new(filename);
+        LocalDbService.SetInfoForFileName(new LocalClipInfo{ FileName = Path.GetFileName(filename), Watched = false, ClipId = -1 });
+        Application.Current.Dispatcher.Invoke(() => UnsavedClipModels.Add(model));
+        await model.UploadClipAsync();
     }
 }

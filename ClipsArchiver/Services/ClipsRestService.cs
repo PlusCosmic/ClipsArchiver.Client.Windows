@@ -2,7 +2,6 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Windows.Media.Imaging;
 using ClipsArchiver.Constants;
 using ClipsArchiver.Entities;
 using ClipsArchiver.Exceptions;
@@ -22,6 +21,7 @@ public class ClipsRestService
     })
     {
         BaseAddress = new Uri("http://10.0.0.10:8080"),
+        Timeout = TimeSpan.FromMinutes(10)
     };
 
     private static IAppCache _cache = new CachingService();
@@ -35,46 +35,6 @@ public class ClipsRestService
     
         var jsonResponse = await response.Content.ReadAsStringAsync();
         return JsonConvert.DeserializeObject<List<Clip>>(jsonResponse) ?? [];
-    }
-
-    public static async Task<BitmapImage> GetThumbnailForClipAsync(int clipId)
-    {
-        Log.Debug($"Getting thumbnail for clip: {clipId}");
-        if (File.Exists(Path.GetTempPath() + $@"ClipsArchiver\{clipId}.png"))
-        {
-            Log.Debug($"Found thumbnail in cache: {Path.GetTempPath() + $@"ClipsArchiver\{clipId}.png"}");
-            return new BitmapImage(new Uri(Path.GetTempPath() + $@"ClipsArchiver\{clipId}.png"));
-        }
-        var response = await _httpClient.GetAsync($"clips/download/thumbnail/{clipId}");
-        Log.Debug($"Got response: {response.StatusCode}");
-        response.EnsureSuccessStatusCode();
-        
-        using var resultStream = await response.Content.ReadAsStreamAsync();
-        
-        if (!Directory.Exists(Path.GetTempPath() + $@"\ClipsArchiver"))
-        {
-            Directory.CreateDirectory(Path.GetTempPath() + $@"\ClipsArchiver");
-        }
-        
-        using var fileStream = File.Create(Path.GetTempPath() + $@"\ClipsArchiver\{clipId}.png");
-        resultStream.CopyTo(fileStream);
-        
-        resultStream.Close();
-        fileStream.Close();
-        
-        return new BitmapImage(new Uri(Path.GetTempPath() + $@"\ClipsArchiver\{clipId}.png"));
-    }
-
-    public static async Task UploadClipsAsync(List<string> clipPaths)
-    {
-        Settings settings = SettingsService.GetSettings();
-        List<Task> tasks = new();
-        foreach (var clipPath in clipPaths)
-        {
-            tasks.Add(UploadClipAsync(clipPath, settings.UserId));
-        }
-
-        await Task.WhenAll(tasks);
     }
 
     public static async Task<Clip> UploadClipAsync(string clipPath, int userId)
