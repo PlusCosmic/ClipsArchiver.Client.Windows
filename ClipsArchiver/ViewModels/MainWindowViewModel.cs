@@ -333,12 +333,13 @@ public class MainWindowViewModel : ViewModelBase
         Application.Current.Dispatcher.Invoke(() =>
         {
             Clips.Clear();
-            clips.ForEach(async x =>
+            clips.ForEach(x =>
             {
                 User user = users.FirstOrDefault(u => u.Id == x.OwnerId) ?? new User();
                 Clips.Add(new ClipViewModel(OpenClipForPlay, x) { ClipOwner = user });
             });
             Rows = (int)Math.Ceiling(clips.Count / 4d);
+            Clips = new ObservableCollection<ClipViewModel>(Clips.OrderBy(x => x.Clip.CreatedOn.Time));
         });
         NoClipsForDate = clips.Count == 0;
     }
