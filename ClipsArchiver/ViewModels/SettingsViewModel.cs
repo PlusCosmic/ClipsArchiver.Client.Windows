@@ -46,6 +46,13 @@ public class SettingsViewModel : ViewModelBase
         get => _currentVersion;
         set => SetField(ref _currentVersion, value);
     }
+    
+    private bool _shouldWatchFolder;
+    public bool ShouldWatchFolder
+    {
+        get => _shouldWatchFolder;
+        set => SetField(ref _shouldWatchFolder, value);
+    }
 
     public AsyncRelayCommand CheckForUpdatesCommand { get; private set; }
     public RelayCommand<FluentWindow> SaveSettingsCommand { get; private set; }
@@ -66,6 +73,7 @@ public class SettingsViewModel : ViewModelBase
         ClipsPath = settings.ClipsPath;
 
         SelectedUser = settings.UserId == 0 ? null : AvailableUsers.First(x => x.Id == settings.UserId);
+        ShouldWatchFolder = settings.ShouldWatchClipsPath;
     }
     
     private async Task CheckForUpdatesAsync()
@@ -94,7 +102,8 @@ public class SettingsViewModel : ViewModelBase
         Settings settings = new()
         {
             UserId = SelectedUser?.Id ?? 0,
-            ClipsPath = ClipsPath ?? string.Empty
+            ClipsPath = ClipsPath ?? string.Empty,
+            ShouldWatchClipsPath = ShouldWatchFolder
         };
         SettingsService.SaveSettings(settings);
         window?.Close();

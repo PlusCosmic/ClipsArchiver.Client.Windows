@@ -25,7 +25,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <ui:TitleBar
             Title="The Clip Archive - Settings"
@@ -42,9 +41,11 @@
                 <ui:SymbolIcon Symbol="Folder16" PreviewMouseDown="FolderIconPressed" Cursor="Hand"/>
             </ui:TextBox.Icon>
         </ui:TextBox>
-        <ui:TextBlock Grid.Row="3" Grid.Column="0" Text="Set user id:" Margin="12" VerticalAlignment="Center"/>
-        <ComboBox Grid.Row="3" Grid.Column="1" Margin="12" ItemsSource="{Binding AvailableUsers}" SelectedItem="{Binding SelectedUser}"/>
-        <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+        <ui:TextBlock Grid.Row="3" Grid.Column="0" Text="Watch clips path for new clips:" Margin="12"/>
+        <ui:ToggleSwitch Grid.Row="3" Grid.Column="1" OffContent="No" OnContent="Yes" IsChecked="{Binding ShouldWatchFolder}" Margin="12"/>
+        <ui:TextBlock Grid.Row="4" Grid.Column="0" Text="Set user id:" Margin="12" VerticalAlignment="Center"/>
+        <ComboBox Grid.Row="4" Grid.Column="1" Margin="12" ItemsSource="{Binding AvailableUsers}" SelectedItem="{Binding SelectedUser}"/>
+        <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
             <ui:Button Content="Save" Margin="12" Command="{Binding SaveSettingsCommand}" 
                        CommandParameter="{Binding RelativeSource={ RelativeSource FindAncestor, AncestorType={ x:Type Window}}}"/>
             <ui:Button Content="Close" Margin="12" Click="CloseButtonPressed"/>
