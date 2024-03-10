@@ -9,4 +9,5 @@ public class LocalClipInfo
     [Indexed]
     public int ClipId { get; set; }
     public bool Watched { get; set; }
+    public string FileName { get; set; }
 }

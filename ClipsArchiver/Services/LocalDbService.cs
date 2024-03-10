@@ -54,4 +54,52 @@ public static class LocalDbService
             _dbConnection.Insert(clipInfo);
         }
     }
+    
+    public static LocalClipInfo GetInfoForFileName(string fileName)
+    {
+        if (!_initialised)
+        {
+            Initialise();
+        }
+
+        var clipInfo = _dbConnection.Table<LocalClipInfo>().FirstOrDefault(x => x.FileName == fileName);
+        if (clipInfo != null) return clipInfo;
+        
+        LocalClipInfo info = new()
+        {
+            FileName = fileName,
+            Watched = false
+        };
+        SetInfoForClipId(info);
+        clipInfo = info;
+
+        return clipInfo;
+    }
+    
+    public static void SetInfoForFileName(LocalClipInfo clipInfo)
+    {
+        if (!_initialised)
+        {
+            Initialise();
+        }
+
+        if (_dbConnection.Table<LocalClipInfo>().Count(x => x.FileName == clipInfo.FileName) > 0)
+        {
+            _dbConnection.Update(clipInfo);
+        }
+        else
+        {
+            _dbConnection.Insert(clipInfo);
+        }
+    }
+    
+    public static List<LocalClipInfo> GetAllClipInfo()
+    {
+        if (!_initialised)
+        {
+            Initialise();
+        }
+
+        return _dbConnection.Table<LocalClipInfo>().ToList();
+    }
 }

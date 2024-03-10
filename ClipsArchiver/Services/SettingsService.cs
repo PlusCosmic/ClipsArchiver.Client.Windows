@@ -12,18 +12,10 @@ public class SettingsService
     public static void SaveSettings(Settings settings)
     {
         string jsonData = JsonConvert.SerializeObject(settings);
-        if (!File.Exists(_settingsPath))
-        {
-            Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-                                      @"\ClipsArchiver\");
-            using StreamWriter createWriter = File.CreateText(_settingsPath);
-            createWriter.Write(jsonData);
-            return;
-        }
-
-        using FileStream fileStream = File.OpenWrite(_settingsPath);
-        using StreamWriter writer = new StreamWriter(fileStream);
-        writer.WriteAsync(jsonData);
+        Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+                                  @"\ClipsArchiver\");
+        using StreamWriter createWriter = File.CreateText(_settingsPath);
+        createWriter.Write(jsonData);
     }
 
     public static Settings GetSettings()
