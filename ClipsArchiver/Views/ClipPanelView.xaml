@@ -31,11 +31,18 @@
             <DatePicker Grid.Column="1" SelectedDate="{Binding SelectedDateTime}" Margin="10,0"/>
             <Button Grid.Column="2" Content="Go Forward" Command="{Binding GoForwardDayCommand}" HorizontalAlignment="Left"/>
             <ui:SymbolIcon Grid.Column="3" Symbol="ArrowUpload24" FontSize="24" Margin="12, 0" 
-                           Visibility="{Binding IsUploading, Converter={StaticResource BoolToInverseVisibilityConverter}}" 
-                           PreviewMouseDown="UploadIconPressed"/>
+                           Visibility="{Binding IsUploading, Converter={StaticResource BoolToInverseVisibilityConverter}}">
+                <ui:SymbolIcon.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenUploadWindowCommand}"></MouseBinding>
+                </ui:SymbolIcon.InputBindings>
+            </ui:SymbolIcon>
             <ui:ProgressRing IsIndeterminate="True" Grid.Column="3" Margin="12, 0" Height="24" Width="24" 
                              Visibility="{Binding IsUploading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <ui:SymbolIcon Grid.Column="4" Symbol="Settings24" FontSize="24" Margin="12, 0" PreviewMouseDown="SettingsIconPressed"/>
+            <ui:SymbolIcon Grid.Column="4" Symbol="Settings24" FontSize="24" Margin="12, 0">
+                <ui:SymbolIcon.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenSettingsWindowCommand}"></MouseBinding>
+                </ui:SymbolIcon.InputBindings>
+            </ui:SymbolIcon>
             
         </Grid>
         <ScrollViewer Grid.Row="1" Visibility="{Binding !NoClipsForDate, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,20,0,0">

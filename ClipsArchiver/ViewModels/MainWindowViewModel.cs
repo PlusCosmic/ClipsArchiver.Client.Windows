@@ -1,17 +1,21 @@
 using System.Collections.ObjectModel;
+using System.Timers;
 using System.Windows;
-using System.Windows.Media.Imaging;
 using ClipsArchiver.Entities;
 using ClipsArchiver.Models;
 using ClipsArchiver.Services;
+using ClipsArchiver.Windows;
 using CommunityToolkit.Mvvm.Input;
 using LibVLCSharp.Shared;
-using Microsoft.Win32;
+using Timer = System.Timers.Timer;
 
 namespace ClipsArchiver.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
+    private Timer? _timer;
+    private readonly UploadViewModel _uploadViewModel;
+    
     public ObservableCollection<ClipViewModel> Clips { get; set; }
 
     private ClipViewModel? _selectedClip;
@@ -193,10 +197,12 @@ public class MainWindowViewModel : ViewModelBase
     public RelayCommand GoNextVideoCommand { get; private set; }
     public AsyncRelayCommand<string> AddTagToSelectedClipCommand { get; private set; }
     public AsyncRelayCommand<string> RemoveTagFromSelectedClipCommand { get; private set; }
-    public AsyncRelayCommand OpenFileDialogForClipsCommand { get; private set; }
+    public RelayCommand OpenSettingsWindowCommand { get; private set; }
+    public RelayCommand OpenUploadWindowCommand { get; private set; }
 
     public MainWindowViewModel()
     {
+        _uploadViewModel = new();
         GoBackDayCommand = new RelayCommand(GoBackDay, CanGoBackDay);
         GoForwardDayCommand = new RelayCommand(GoForwardDay, CanGoForwardDay);
         GoBackCommand = new RelayCommand(CloseActiveClip);
@@ -206,7 +212,8 @@ public class MainWindowViewModel : ViewModelBase
         GoNextVideoCommand = new RelayCommand(GoNextVideo);
         AddTagToSelectedClipCommand = new AsyncRelayCommand<string>(AddTagToSelectedClip);
         RemoveTagFromSelectedClipCommand = new AsyncRelayCommand<string>(RemoveTagFromSelectedClip);
-        OpenFileDialogForClipsCommand = new AsyncRelayCommand(GetClipsForUpload);
+        OpenSettingsWindowCommand = new RelayCommand(OpenSettingsWindow);
+        OpenUploadWindowCommand = new RelayCommand(OpenUploadWindow);
         SelectedDateTime = DateTime.Now.Hour < 4 ? DateTime.Now.AddDays(-1) : DateTime.Now;
         Clips = new ObservableCollection<ClipViewModel>();
         AllTags = new ObservableCollection<string>();
@@ -214,6 +221,15 @@ public class MainWindowViewModel : ViewModelBase
         _mediaPlayer = new MediaPlayer(LibVlc);
         VideoVolume = 100;
         PlaybackSpeed = 100;
+        Settings settings = SettingsService.GetSettings();
+        if(settings.ShouldWatchClipsPath)
+        {
+            StartPollWatchFolder();
+        }
+        else
+        {
+            StopPollWatchFolder();
+        }
         //Cache users for clips to use
         Task.Run(ClipsRestService.GetAllUsersAsync);
         Task.Run(async() =>
@@ -256,11 +272,6 @@ public class MainWindowViewModel : ViewModelBase
     private void OpenClipForPlay(ClipViewModel viewModel)
     {
         SelectedClip = viewModel;
-        
-        if (SelectedClip.VideoUri is null)
-        {
-            return;
-        }
         ShowingVideo = true;
         
         MediaPlayer.Media = new Media(LibVlc, SelectedClip.VideoUri);
@@ -314,21 +325,6 @@ public class MainWindowViewModel : ViewModelBase
     {
         
     }
-
-    public async Task GetClipsForUpload()
-    {
-        Settings settings = SettingsService.GetSettings();
-        var fileDialog = new OpenFileDialog();
-        fileDialog.Multiselect = true;
-        fileDialog.Filter = "mp4 files (*.mp4)|*.mp4";
-        fileDialog.DefaultDirectory = settings.ClipsPath;
-        if (fileDialog.ShowDialog() ?? false)
-        {
-            IsUploading = true;
-            await ClipsRestService.UploadClipsAsync(new List<string>(fileDialog.FileNames));
-            IsUploading = false;
-        }
-    }
     
     private async Task UpdateClipsForDateAsync()
     {
@@ -337,13 +333,13 @@ public class MainWindowViewModel : ViewModelBase
         Application.Current.Dispatcher.Invoke(() =>
         {
             Clips.Clear();
-            clips.ForEach(async x =>
+            clips.ForEach(x =>
             {
-                BitmapImage image = await ClipsRestService.GetThumbnailForClipAsync(x.Id);
                 User user = users.FirstOrDefault(u => u.Id == x.OwnerId) ?? new User();
                 Clips.Add(new ClipViewModel(OpenClipForPlay, x) { ClipOwner = user });
             });
             Rows = (int)Math.Ceiling(clips.Count / 4d);
+            Clips = new ObservableCollection<ClipViewModel>(Clips.OrderBy(x => x.Clip.CreatedOn.Time));
         });
         NoClipsForDate = clips.Count == 0;
     }
@@ -364,5 +360,58 @@ public class MainWindowViewModel : ViewModelBase
             SelectedClip.Tags.Remove(tag);
             await SelectedClip.SaveClipAsync();
         }
+    }
+    
+    private void OpenSettingsWindow()
+    {
+        SettingsWindow settingsWindow = new();
+        settingsWindow.ShowDialog();
+        Settings settings = SettingsService.GetSettings();
+        if(settings.ShouldWatchClipsPath)
+        {
+            StartPollWatchFolder();
+        }
+        else
+        {
+            StopPollWatchFolder();
+        }
+    }
+
+    private void OpenUploadWindow()
+    {
+        UploadWindow uploadWindow = new();
+        uploadWindow.DataContext = _uploadViewModel;
+        uploadWindow.ShowDialog();
+    }
+    
+    private void StartPollWatchFolder()
+    {
+        if(_timer is not null && _timer.Enabled)
+        {
+            return;
+        }
+        _timer = new Timer();
+        _timer.Interval = 1000 * 5;
+        _timer.AutoReset = true;
+        _timer.Elapsed += PollWatchFolder;
+        _timer.Start();
+    }
+    
+    private void StopPollWatchFolder()
+    {
+        _timer?.Stop();
+    }
+
+    private async void PollWatchFolder(object? sender, ElapsedEventArgs e)
+    {
+        Settings settings = SettingsService.GetSettings();
+        var newFiles = LocalFileService.GetNewFilesInClipsDir();
+        List<Task> tasks = new();
+        foreach (var newFile in newFiles)
+        {
+            tasks.Add(_uploadViewModel.AddNewClipAndUploadAsync(settings.ClipsPath + "\\" + newFile));
+        }
+
+        await Task.WhenAll(tasks);
     }
 }

@@ -75,6 +75,9 @@ public class UnsavedClipModel() : ViewModelBase
         {
             Clip clip = await ClipsRestService.UploadClipAsync(_localFilePath, settings.UserId);
             _clipId = clip.Id;
+            LocalClipInfo clipInfo = LocalDbService.GetInfoForFileName(_localFilename);
+            clipInfo.ClipId = clip.Id;
+            LocalDbService.SetInfoForFileName(clipInfo);
             StartPollQueueStatus();
         }
         catch (ClipExistsUploadException)
