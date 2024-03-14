@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Reflection;
 using ClipsArchiver.Entities;
-using ClipsArchiver.Events;
 using ClipsArchiver.Services;
 using CommunityToolkit.Mvvm.Input;
 using Velopack;
@@ -70,7 +69,6 @@ public class SettingsViewModel : ViewModelBase
     {
         CheckForUpdatesCommand = new AsyncRelayCommand(CheckForUpdatesAsync);
         SaveSettingsCommand = new RelayCommand<FluentWindow>(SaveSettings);
-        RequestControlCommand = new RelayCommand(RequestControl);
         CurrentVersion = "v" + Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString() ?? "1.0.0";
         Task.Run(InitAsync);
     }
@@ -117,15 +115,5 @@ public class SettingsViewModel : ViewModelBase
         };
         SettingsService.SaveSettings(settings);
         window?.Close();
-    }
-
-    private void RequestControl()
-    {
-        if (SelectedRequestUser == null || SelectedUser == null)
-        {
-            return;
-        }
-        
-        RabbitMqService.Publish(new RequestControlPayload() { RequesterId = SelectedUser.Id, RecieverId = SelectedRequestUser.Id});
     }
 }
