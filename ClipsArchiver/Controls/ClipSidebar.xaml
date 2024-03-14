@@ -24,6 +24,8 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <ui:TextBlock Grid.Row="0" Text="{Binding SelectedClip.Clip.Filename, FallbackValue={x:Static system:String.Empty}}" TextWrapping="Wrap" TextAlignment="Center" Appearance="Primary" FontTypography="Subtitle"/>
                 <Grid Grid.Row="1">
@@ -59,6 +61,21 @@
                         </ui:SymbolIcon>
                     </ui:AutoSuggestBox.Icon>
                 </ui:AutoSuggestBox>
+                <Grid Grid.Row="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ui:Button Grid.Column="0" HorizontalAlignment="Stretch" 
+                               Content="Download" Command="{Binding DownloadClipCommand}" 
+                               Margin="10"/>
+                    <ui:Button Grid.Column="1" HorizontalAlignment="Stretch" 
+                               Foreground="{DynamicResource SystemFillColorCriticalBrush}" 
+                               Background="{DynamicResource SystemFillColorCriticalBackgroundBrush}" 
+                               Content="Delete" 
+                               Command="{Binding DeleteClipCommand}" 
+                               Margin="10"/>
+                </Grid>
             </Grid>
             <ui:TextBlock VerticalAlignment="Center" 
                           HorizontalAlignment="Center" 
