@@ -1,6 +1,4 @@
-using System.Reflection;
 using System.Text;
-using ClipsArchiver.Events;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -67,23 +65,5 @@ public static class RabbitMqService
 
     private static void Consume(object? model, BasicDeliverEventArgs args)
     {
-        if (!args.BasicProperties.Headers.TryGetValue("type", out var type))
-        {
-            return;
-        }
-
-        string typeString = Encoding.UTF8.GetString(type as byte[]);
-        switch (typeString){
-            case "RequestControlPayload":
-                EventAggregator.GetEvent<RequestControlEvent>().Publish(JsonConvert.DeserializeObject<RequestControlPayload>(Encoding.UTF8.GetString(args.Body)));
-                break;
-            case "StopControlPayload":
-                EventAggregator.GetEvent<StopControlEvent>().Publish(JsonConvert.DeserializeObject<StopControlPayload>(Encoding.UTF8.GetString(args.Body)));
-                break;
-            case "TakeActionPayload":
-                EventAggregator.GetEvent<TakeActionEvent>().Publish(JsonConvert.DeserializeObject<TakeActionPayload>(Encoding.UTF8.GetString(args.Body)));
-                break;
-            
-        }
     }
 }
