@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Reflection;
 using ClipsArchiver.Entities;
+using ClipsArchiver.Events;
 using ClipsArchiver.Services;
 using CommunityToolkit.Mvvm.Input;
 using Velopack;
@@ -16,6 +17,13 @@ public class SettingsViewModel : ViewModelBase
     {
         get => _selectedUser;
         set => SetField(ref _selectedUser, value);
+    }
+
+    private User? _selectedRequestUser;
+    public User? SelectedRequestUser
+    {
+        get => _selectedRequestUser;
+        set => SetField(ref _selectedRequestUser, value);
     }
 
     private ObservableCollection<User>? _availableUsers;
@@ -55,12 +63,14 @@ public class SettingsViewModel : ViewModelBase
     }
 
     public AsyncRelayCommand CheckForUpdatesCommand { get; private set; }
+    public RelayCommand RequestControlCommand { get; private set; }
     public RelayCommand<FluentWindow> SaveSettingsCommand { get; private set; }
     
     public SettingsViewModel()
     {
         CheckForUpdatesCommand = new AsyncRelayCommand(CheckForUpdatesAsync);
         SaveSettingsCommand = new RelayCommand<FluentWindow>(SaveSettings);
+        RequestControlCommand = new RelayCommand(RequestControl);
         CurrentVersion = "v" + Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString() ?? "1.0.0";
         Task.Run(InitAsync);
     }
@@ -107,5 +117,15 @@ public class SettingsViewModel : ViewModelBase
         };
         SettingsService.SaveSettings(settings);
         window?.Close();
+    }
+
+    private void RequestControl()
+    {
+        if (SelectedRequestUser == null || SelectedUser == null)
+        {
+            return;
+        }
+        
+        RabbitMqService.Publish(new RequestControlPayload() { RequesterId = SelectedUser.Id, RecieverId = SelectedRequestUser.Id});
     }
 }
