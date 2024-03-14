@@ -126,4 +126,21 @@ public class ClipsRestService
         using HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"clips/{clip.Id}", clip);
         response.EnsureSuccessStatusCode();
     }
+    
+    public static async Task DeleteClipAsync(int clipId)
+    {
+        Log.Debug($"Deleting clip with id: {clipId}");
+        using HttpResponseMessage response = await _httpClient.DeleteAsync($"clips/{clipId}");
+        response.EnsureSuccessStatusCode();
+    }
+    
+    public static async Task DownloadClipAsync(int clipId, string savePath)
+    {
+        Log.Debug($"Downloading clip with id: {clipId}");
+        using HttpResponseMessage response = await _httpClient.GetAsync($"clips/download/{clipId}");
+        response.EnsureSuccessStatusCode();
+        await using Stream contentStream = await response.Content.ReadAsStreamAsync();
+        await using FileStream fileStream = new(savePath, FileMode.Create, FileAccess.Write, FileShare.None);
+        await contentStream.CopyToAsync(fileStream);
+    }
 }

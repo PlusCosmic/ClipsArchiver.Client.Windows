@@ -7,6 +7,7 @@ using ClipsArchiver.Services;
 using ClipsArchiver.Windows;
 using CommunityToolkit.Mvvm.Input;
 using LibVLCSharp.Shared;
+using Microsoft.Win32;
 using Timer = System.Timers.Timer;
 
 namespace ClipsArchiver.ViewModels;
@@ -15,8 +16,14 @@ public class MainWindowViewModel : ViewModelBase
 {
     private Timer? _timer;
     private readonly UploadViewModel _uploadViewModel;
-    
-    public ObservableCollection<ClipViewModel> Clips { get; set; }
+
+    private ObservableCollection<ClipViewModel> _clips;
+
+    public ObservableCollection<ClipViewModel> Clips
+    {
+        get => _clips; 
+        set => SetField(ref _clips, value);
+    }
 
     private ClipViewModel? _selectedClip;
     public ClipViewModel? SelectedClip
@@ -195,6 +202,8 @@ public class MainWindowViewModel : ViewModelBase
     public RelayCommand PauseVideoCommand { get; private set; }
     public RelayCommand GoPrevVideoCommand { get; private set; }
     public RelayCommand GoNextVideoCommand { get; private set; }
+    public AsyncRelayCommand DownloadClipCommand { get; private set; }
+    public AsyncRelayCommand DeleteClipCommand { get; private set; }
     public AsyncRelayCommand<string> AddTagToSelectedClipCommand { get; private set; }
     public AsyncRelayCommand<string> RemoveTagFromSelectedClipCommand { get; private set; }
     public RelayCommand OpenSettingsWindowCommand { get; private set; }
@@ -214,6 +223,8 @@ public class MainWindowViewModel : ViewModelBase
         RemoveTagFromSelectedClipCommand = new AsyncRelayCommand<string>(RemoveTagFromSelectedClip);
         OpenSettingsWindowCommand = new RelayCommand(OpenSettingsWindow);
         OpenUploadWindowCommand = new RelayCommand(OpenUploadWindow);
+        DownloadClipCommand = new AsyncRelayCommand(DownloadClipAsync);
+        DeleteClipCommand = new AsyncRelayCommand(DeleteClipAsync);
         SelectedDateTime = DateTime.Now.Hour < 4 ? DateTime.Now.AddDays(-1) : DateTime.Now;
         Clips = new ObservableCollection<ClipViewModel>();
         AllTags = new ObservableCollection<string>();
@@ -413,5 +424,31 @@ public class MainWindowViewModel : ViewModelBase
         }
 
         await Task.WhenAll(tasks);
+    }
+
+    private async Task DownloadClipAsync()
+    {
+        if (SelectedClip is null)
+        {
+            return;
+        }
+
+        OpenFolderDialog dialog = new();
+        if (dialog.ShowDialog() == true)
+        {
+            await ClipsRestService.DownloadClipAsync(SelectedClip.Clip.Id, dialog.FolderName);
+        }
+    }
+
+    private async Task DeleteClipAsync()
+    {
+        if(SelectedClip is null)
+        {
+            return;
+        }
+        
+        await ClipsRestService.DeleteClipAsync(SelectedClip.Clip.Id);
+        Clips.Remove(SelectedClip);
+        CloseActiveClip();
     }
 }
