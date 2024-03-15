@@ -2,16 +2,13 @@ using System.Collections.ObjectModel;
 using System.Timers;
 using System.Windows;
 using ClipsArchiver.Entities;
-using ClipsArchiver.Events;
 using ClipsArchiver.Models;
 using ClipsArchiver.Services;
 using ClipsArchiver.Windows;
 using CommunityToolkit.Mvvm.Input;
 using LibVLCSharp.Shared;
 using Microsoft.Win32;
-using MessageBoxResult = Wpf.Ui.Controls.MessageBoxResult;
 using Timer = System.Timers.Timer;
-using Action = ClipsArchiver.Constants.Action;
 
 namespace ClipsArchiver.ViewModels;
 
@@ -125,10 +122,6 @@ public class MainWindowViewModel : ViewModelBase
                 if (IsScrubbing)
                 {
                     MediaPlayer.SeekTo(new TimeSpan(0,0,0,0,(int)((VideoProgress / 100d) * MediaPlayer.Length)));
-                    if (_isControlling)
-                    {
-                        RabbitMqService.Publish(new TakeActionPayload { Action = Action.Scrub, Value = (int)VideoProgress, RecieverId = _controllingId, RequesterId = _userId });
-                    }
                 }
             }
             
@@ -144,10 +137,6 @@ public class MainWindowViewModel : ViewModelBase
             if(SetField(ref _playbackSpeed, value))
             {
                 MediaPlayer.SetRate((float)PlaybackSpeed / 100);
-                if (_isControlling)
-                {
-                    RabbitMqService.Publish(new TakeActionPayload { Action = Action.SlowMo, Value = (int)PlaybackSpeed, RecieverId = _controllingId, RequesterId = _userId });
-                }
             }
         }
     }
@@ -263,8 +252,6 @@ public class MainWindowViewModel : ViewModelBase
         _mediaPlayer = new MediaPlayer(LibVlc);
         VideoVolume = 100;
         PlaybackSpeed = 100;
-        RabbitMqService.EventAggregator.GetEvent<RequestControlResponseEvent>().Subscribe(OnRequestControlResponse, ThreadOption.UIThread);
-        RabbitMqService.EventAggregator.GetEvent<RequestControlEvent>().Subscribe(OnRequestControl, ThreadOption.UIThread);
         Settings settings = SettingsService.GetSettings();
         if(settings.ShouldWatchClipsPath)
         {
@@ -299,10 +286,6 @@ public class MainWindowViewModel : ViewModelBase
     private void GoBackDay()
     {
         SelectedDateTime = SelectedDateTime.AddDays(-1);
-        if (_isControlling)
-        {
-            RabbitMqService.Publish(new TakeActionPayload {Action = Action.SelectDate, Value = (int)SelectedDateTime.Ticks, RecieverId = _controllingId, RequesterId = _userId});
-        }
     }
 
     private bool CanGoBackDay()
@@ -313,10 +296,6 @@ public class MainWindowViewModel : ViewModelBase
     private void GoForwardDay()
     {
         SelectedDateTime = SelectedDateTime.AddDays(1);
-        if (_isControlling)
-        {
-            RabbitMqService.Publish(new TakeActionPayload {Action = Action.SelectDate, Value = (int)SelectedDateTime.Ticks, RecieverId = _controllingId, RequesterId = _userId});
-        }
     }
 
     private bool CanGoForwardDay()
@@ -327,10 +306,6 @@ public class MainWindowViewModel : ViewModelBase
     private void OpenClipForPlay(ClipViewModel viewModel)
     {
         SelectedClip = viewModel;
-        if (_isControlling)
-        {
-            RabbitMqService.Publish(new TakeActionPayload { Action = Action.SelectVideo, Value = viewModel.Clip.Id, RecieverId = _controllingId, RequesterId = _userId });
-        }
         ShowingVideo = true;
         
         MediaPlayer.Media = new Media(LibVlc, SelectedClip.VideoUri);
@@ -340,10 +315,6 @@ public class MainWindowViewModel : ViewModelBase
     
     public void CloseActiveClip()
     {
-        if (_isControlling)
-        {
-            RabbitMqService.Publish(new TakeActionPayload { Action = Action.CloseVideo, Value = SelectedClip.Clip.Id, RecieverId = _controllingId, RequesterId = _userId });
-        }
         MediaPlayer.Stop();
         MediaPlayer.TimeChanged -= MediaPlayerOnTimeChanged;
         SelectedClip = null;
@@ -505,81 +476,4 @@ public class MainWindowViewModel : ViewModelBase
         Clips.Remove(SelectedClip);
         CloseActiveClip();
     }
-
-    private void OnRequestControlResponse(RequestControlResponsePayload payload)
-    {
-        if (payload.RecieverId == _userId)
-        {
-            _isControlling = true;
-            _controllingId = payload.RequesterId;
-        }
-    }
-
-    private async void OnRequestControl(RequestControlPayload payload)
-    {
-        if (payload.RecieverId != _userId)
-        {
-            return;
-        }
-        
-        List<User> users = await ClipsRestService.GetAllUsersAsync();
-        User requester = users.First(x => x.Id == payload.RequesterId);
-        
-        var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-        {
-            Title = "Request for control",
-            Content = $"{requester.Name} wants to control your session.",
-            PrimaryButtonText = "Accept",
-            CloseButtonText = "Decline"
-        };
-
-        var result = await uiMessageBox.ShowDialogAsync();
-        if (result == MessageBoxResult.Primary)
-        {
-            _isControlled = true;
-            _controllerId = requester.Id;
-            RabbitMqService.EventAggregator.GetEvent<TakeActionEvent>().Subscribe(OnActionRecieved);
-            RabbitMqService.Publish(new RequestControlResponsePayload() { RecieverId = requester.Id, RequesterId = _userId, Accepted = true });
-        }
-        else
-        {
-            RabbitMqService.Publish(new RequestControlResponsePayload() { RecieverId = requester.Id, RequesterId = _userId, Accepted = false });
-        }
-    }
-
-    private void OnActionRecieved(TakeActionPayload payload)
-    {
-        if (payload.RecieverId != _userId)
-        {
-            return;
-        }
-        
-        switch (payload.Action) 
-        {
-            case Action.Play:
-                PlayVideo();
-                break;
-            case Action.Pause:
-                PauseVideo();
-                break;
-            case Action.Scrub:
-                PauseVideo();
-                VideoProgress = payload.Value;
-                PlayVideo();
-                break;
-            case Action.SlowMo:
-                PlaybackSpeed = payload.Value;
-                break;
-            case Action.CloseVideo:
-                CloseActiveClip();
-                break;
-            case Action.SelectVideo:
-                SelectedClip = Clips.First(x => x.Clip.Id == payload.Value);
-                SelectedClip.ShowVideoCommand.Execute(null);
-                break;
-            case Action.SelectDate:
-                SelectedDateTime = new DateTime(payload.Value);
-                break;
-        }
-    } 
 }
