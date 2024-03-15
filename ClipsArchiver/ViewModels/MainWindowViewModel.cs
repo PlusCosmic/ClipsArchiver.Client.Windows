@@ -352,12 +352,22 @@ public class MainWindowViewModel : ViewModelBase
 
     public void GoPrevVideo()
     {
-        
+        int idx = Clips.IndexOf(SelectedClip);
+        CloseActiveClip();
+        if (idx > 0)
+        {
+            OpenClipForPlay(Clips[idx - 1]);
+        }
     }
 
     public void GoNextVideo()
     {
-        
+        int idx = Clips.IndexOf(SelectedClip);
+        CloseActiveClip();
+        if (idx < Clips.Count - 1)
+        {
+            OpenClipForPlay(Clips[idx + 1]);
+        }
     }
     
     private async Task UpdateClipsForDateAsync()
