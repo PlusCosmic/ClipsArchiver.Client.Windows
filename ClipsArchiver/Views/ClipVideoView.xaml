@@ -78,8 +78,16 @@
                     <ui:SymbolIcon Symbol="AnimalRabbit24" FontSize="24" Margin="12, 0"/>
                 </Grid>
                 <Slider Grid.Column="5" Width="40" Minimum="40" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Value="{Binding PlaybackSpeed}"/>
-                <ui:SymbolIcon Grid.Column="6" Symbol="Previous24" FontSize="24" Margin="12, 0"/>
-                <ui:SymbolIcon Grid.Column="7" Symbol="Next24" FontSize="24" Margin="12, 0"/>
+                <ui:SymbolIcon Grid.Column="6" Symbol="Previous24" FontSize="24" Margin="12, 0" Cursor="Hand">
+                    <ui:SymbolIcon.InputBindings>
+                        <MouseBinding Gesture="LeftClick" Command="{Binding GoPrevVideoCommand}"/>
+                    </ui:SymbolIcon.InputBindings>
+                </ui:SymbolIcon>
+                <ui:SymbolIcon Grid.Column="7" Symbol="Next24" FontSize="24" Margin="12, 0" Cursor="Hand">
+                    <ui:SymbolIcon.InputBindings>
+                        <MouseBinding Gesture="LeftClick" Command="{Binding GoNextVideoCommand}"/>
+                    </ui:SymbolIcon.InputBindings>
+                </ui:SymbolIcon>
             </Grid>
         </Grid>
     </Grid>
