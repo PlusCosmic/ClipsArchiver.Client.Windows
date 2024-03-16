@@ -37,44 +37,61 @@ public class ClipsRestService
         return JsonConvert.DeserializeObject<List<Clip>>(jsonResponse) ?? [];
     }
 
-    public static async Task<Clip> UploadClipAsync(string clipPath, int userId, bool throttleUpload = true)
+    public static async Task<Clip> UploadClipAsync(string clipPath, int userId, bool throttleUpload = true, int retryCount = 0)
     {
-        if (await GetClipExistsByFilenameAsync(Path.GetFileName(clipPath)))
+        try
         {
-            throw new ClipExistsUploadException();
+            if (await GetClipExistsByFilenameAsync(Path.GetFileName(clipPath)))
+            {
+                throw new ClipExistsUploadException();
+            }
+
+            Log.Debug($"Uploading video file: {clipPath}");
+            if (!File.Exists(clipPath))
+            {
+                throw new ErrorUploadException();
+            }
+
+            Stream stream = File.OpenRead(clipPath);
+            if (throttleUpload)
+            {
+                stream = new ThrottledStream(stream, 50000);
+            }
+
+            if (FileTypeDetector.DetectFileType(stream) != FileType.Mp4)
+            {
+                stream.Close();
+                throw new ErrorUploadException();
+            }
+
+            DateTime dateTime = File.GetCreationTimeUtc(clipPath);
+
+            MultipartFormDataContent content = new MultipartFormDataContent();
+            content.Add(
+                new StringContent($"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour}-{dateTime.Minute}"),
+                "creationDateTime");
+            content.Add(new StreamContent(stream), "file", Path.GetFileName(clipPath));
+            HttpResponseMessage response = await _httpClient.PostAsync($"/clips/upload/{userId}", content);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new ErrorUploadException();
+            }
+
+            Log.Debug($"Got response: {response.StatusCode}");
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<Clip>(jsonResponse) ?? throw new ErrorUploadException();
+        }
+        catch (Exception ex)
+        {
+            Thread.Sleep(1000 * 10);
+            if (retryCount > 4)
+            {
+                throw;
+            }
+            Log.Error(ex, "Error uploading clip, retrying");
+            return await UploadClipAsync(clipPath, userId, throttleUpload, retryCount + 1);
         }
         
-        Log.Debug($"Uploading video file: {clipPath}");
-        if (!File.Exists(clipPath))
-        {
-            throw new ErrorUploadException();
-        }
-
-        Stream stream = File.OpenRead(clipPath);
-        if (throttleUpload)
-        {
-            stream = new ThrottledStream(stream, 50000);
-        }
-
-        if (FileTypeDetector.DetectFileType(stream) != FileType.Mp4)
-        {
-            stream.Close();
-            throw new ErrorUploadException();
-        }
-
-        DateTime dateTime = File.GetCreationTimeUtc(clipPath);
-
-        MultipartFormDataContent content = new MultipartFormDataContent();
-        content.Add(new StringContent($"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour}-{dateTime.Minute}"), "creationDateTime");
-        content.Add(new StreamContent(stream), "file", Path.GetFileName(clipPath));
-        HttpResponseMessage response = await _httpClient.PostAsync($"/clips/upload/{userId}", content);
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new ErrorUploadException();
-        }
-        Log.Debug($"Got response: {response.StatusCode}");
-        var jsonResponse = await response.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<Clip>(jsonResponse) ?? throw new ErrorUploadException();
     }
 
     public static async Task<List<User>> GetAllUsersAsync()
