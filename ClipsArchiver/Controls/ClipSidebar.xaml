@@ -49,15 +49,13 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <ui:AutoSuggestBox x:Name="AutoSuggestBox" Grid.Row="4" PlaceholderText="Add Tag..." Margin="10" OriginalItemsSource="{Binding AllTags}" KeyUp="AutoSuggestBox_OnKeyUp" SuggestionChosen="AutoSuggestBox_OnSuggestionChosen">
-                    <ui:AutoSuggestBox.InputBindings>
-                        <KeyBinding Key="Enter" Command="{Binding AddTagToSelectedClipCommand}" CommandParameter="{Binding Text,ElementName=AutoSuggestBox}"/>
-                    </ui:AutoSuggestBox.InputBindings>
+                <ui:AutoSuggestBox x:Name="AutoSuggestBox" Grid.Row="4"
+                                   PlaceholderText="Add Tag..." Margin="10" 
+                                   OriginalItemsSource="{Binding AllTags}"
+                                   UpdateTextOnSelect="True"
+                                   KeyDown="AutoSuggestBox_OnKeyDown">
                     <ui:AutoSuggestBox.Icon>
-                        <ui:SymbolIcon Symbol="Search24" Cursor="Hand" MouseUp="SearchIcon_OnMouseUp">
-                            <ui:SymbolIcon.InputBindings>
-                                <MouseBinding Gesture="LeftClick" Command="{Binding AddTagToSelectedClipCommand}" CommandParameter="{Binding Text,ElementName=AutoSuggestBox}"/>
-                            </ui:SymbolIcon.InputBindings>
+                        <ui:SymbolIcon Symbol="Search24" Cursor="Hand" MouseDown="UIElement_OnMouseDown">
                         </ui:SymbolIcon>
                     </ui:AutoSuggestBox.Icon>
                 </ui:AutoSuggestBox>

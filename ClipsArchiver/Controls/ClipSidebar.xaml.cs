@@ -1,7 +1,6 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using ClipsArchiver.ViewModels;
-using Wpf.Ui.Controls;
 
 namespace ClipsArchiver.Controls;
 
@@ -12,33 +11,29 @@ public partial class ClipSidebar : UserControl
         InitializeComponent();
     }
 
-    private void OnTagSelectionSubmitted()
+    private void AutoSuggestBox_OnKeyDown(object sender, KeyEventArgs e)
     {
-        AutoSuggestBox.Text = string.Empty;
-    }
-
-    private void AutoSuggestBox_OnKeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter)
+        if (e.Key != Key.Enter)
         {
-            OnTagSelectionSubmitted();
+            return;
         }
+        
+        AddTag();
     }
 
-    private void SearchIcon_OnMouseUp(object sender, MouseButtonEventArgs e)
+    private void UIElement_OnMouseDown(object sender, MouseButtonEventArgs e)
     {
-        OnTagSelectionSubmitted();
+        AddTag();
     }
 
-    private void AutoSuggestBox_OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    private void AddTag()
     {
         if (DataContext is not MainWindowViewModel viewModel)
         {
             return;
         }
-        viewModel.AddTagToSelectedClipCommand.Execute(args.SelectedItem);
-        args.Handled = true;
-        OnTagSelectionSubmitted();
-        
+        viewModel.AddTagToSelectedClipCommand.Execute(AutoSuggestBox.Text);
+        AutoSuggestBox.Text = string.Empty;
+        AutoSuggestBox.Focus();
     }
 }

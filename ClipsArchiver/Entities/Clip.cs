@@ -10,7 +10,7 @@ public class Clip
     public int OwnerId { get; set; }
     public string? Filename { get; set; }
     public bool IsProcessed { get; set; }
-    public NullTime CreatedOn { get; set; }
+    public NullTime? CreatedOn { get; set; }
     public int Duration { get; set; }
     public List<string> Tags { get; set; } = new();
     public string VideoUri { get; set; } = string.Empty;

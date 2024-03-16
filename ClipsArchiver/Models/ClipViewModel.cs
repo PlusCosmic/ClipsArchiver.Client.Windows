@@ -11,7 +11,7 @@ namespace ClipsArchiver.Models;
 public class ClipViewModel : ViewModelBase
 {
     private readonly Action<ClipViewModel> _openClipAction;
-    private LocalClipInfo _clipInfo;
+    public LocalClipInfo ClipInfo { get; set; }
     
     private BitmapImage _thumbnail;
     public BitmapImage Thumbnail
@@ -82,8 +82,8 @@ public class ClipViewModel : ViewModelBase
         _thumbnail = new BitmapImage(new Uri(clip.ThumbnailUri));
         ShowVideoCommand = new RelayCommand<ClipViewModel>(ShowVideo);
         _openClipAction = openClipAction;
-        _clipInfo = LocalDbService.GetInfoForClipId(clip.Id);
-        IsWatched = _clipInfo.Watched;
+        ClipInfo = LocalDbService.GetInfoForClipId(clip.Id);
+        IsWatched = ClipInfo.Watched;
         _tags = new ObservableCollection<string>();
         clip.Tags?.ForEach(t => Tags.Add(t));
     }
@@ -95,11 +95,11 @@ public class ClipViewModel : ViewModelBase
             return;
         }
 
-        if (!_clipInfo.Watched)
+        if (!ClipInfo.Watched)
         {
-            _clipInfo.Watched = true;
+            ClipInfo.Watched = true;
             IsWatched = true;
-            LocalDbService.SetInfoForClipId(_clipInfo);
+            LocalDbService.SetInfoForClipId(ClipInfo);
         }
         
         _openClipAction.Invoke(model);
