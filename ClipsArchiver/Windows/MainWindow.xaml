@@ -20,6 +20,12 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
         Height="1080" Width="1920">
+    <ui:FluentWindow.InputBindings>
+        <KeyBinding Key="Space" Command="{Binding TogglePlaybackCommand}"/>
+        <KeyBinding Key="Left" Command="{Binding SkipFiveSecondsBackCommand}"/>
+        <KeyBinding Key="Right" Command="{Binding SkipFiveSecondsForwardCommand}"/>
+        <KeyBinding Key="Escape" Command="{Binding GoBackCommand}"/>
+    </ui:FluentWindow.InputBindings>
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:BoolToInverseVisibilityConverter x:Key="BoolToInverseVisibilityConverter"/>
