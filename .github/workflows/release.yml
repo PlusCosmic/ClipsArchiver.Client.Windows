@@ -24,6 +24,6 @@ jobs:
        run: |
           dotnet tool install -g vpk
           vpk download github --repoUrl https://github.com/PlusCosmic/ClipsArchiver.Client.Windows
-          vpk pack -u clipsArchiver -v ${{ steps.get-version.outputs.version }} -p publish
+          vpk pack -u clipsArchiver -v ${{ steps.get-version.outputs.version }} -p publish --packTitle "Clips Archiver" -i "ClipsArchiver/Resources/clipsarchiver.ico"
           vpk upload github --repoUrl https://github.com/PlusCosmic/ClipsArchiver.Client.Windows --publish --releaseName "Clips Archiver ${{ steps.get-version.outputs.version }}" --tag v${{ steps.get-version.outputs.version }} --token ${{ secrets.GITHUB_TOKEN }}
           
