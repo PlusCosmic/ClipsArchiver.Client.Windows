@@ -37,7 +37,7 @@ public class ClipsRestService
         return JsonConvert.DeserializeObject<List<Clip>>(jsonResponse) ?? [];
     }
 
-    public static async Task<Clip> UploadClipAsync(string clipPath, int userId)
+    public static async Task<Clip> UploadClipAsync(string clipPath, int userId, bool throttleUpload = true)
     {
         if (await GetClipExistsByFilenameAsync(Path.GetFileName(clipPath)))
         {
@@ -50,7 +50,11 @@ public class ClipsRestService
             throw new ErrorUploadException();
         }
 
-        FileStream stream = File.OpenRead(clipPath);
+        Stream stream = File.OpenRead(clipPath);
+        if (throttleUpload)
+        {
+            stream = new ThrottledStream(stream, 50000);
+        }
 
         if (FileTypeDetector.DetectFileType(stream) != FileType.Mp4)
         {
