@@ -38,4 +38,8 @@ public partial class ClipVideoView : UserControl
         }
         viewModel.IsScrubbing = false;
     }
+
+    private void ClipVideoView_OnKeyDown(object sender, KeyEventArgs e)
+    {
+    }
 }

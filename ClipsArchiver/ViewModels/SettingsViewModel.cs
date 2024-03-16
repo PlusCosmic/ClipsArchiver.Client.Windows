@@ -62,11 +62,13 @@ public class SettingsViewModel : ViewModelBase
     }
 
     public AsyncRelayCommand CheckForUpdatesCommand { get; private set; }
-    public RelayCommand RequestControlCommand { get; private set; }
     public RelayCommand<FluentWindow> SaveSettingsCommand { get; private set; }
     
     public SettingsViewModel()
     {
+        _updateStatus = string.Empty;
+        UpdateStatus = string.Empty;
+        _currentVersion = string.Empty;
         CheckForUpdatesCommand = new AsyncRelayCommand(CheckForUpdatesAsync);
         SaveSettingsCommand = new RelayCommand<FluentWindow>(SaveSettings);
         CurrentVersion = "v" + Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString() ?? "1.0.0";
