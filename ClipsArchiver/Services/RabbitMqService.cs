@@ -52,7 +52,7 @@ public static class RabbitMqService
         BasicProperties properties = new();
         properties.Headers = new Dictionary<string, object>
         {
-            {"type", payload.GetType().Name}
+            {"type", payload?.GetType().Name ?? string.Empty}
         };
         
         var body = Encoding.UTF8.GetBytes(message);

@@ -16,13 +16,8 @@ public class MainWindowViewModel : ViewModelBase
 {
     private Timer? _timer;
     private readonly UploadViewModel _uploadViewModel;
-    private bool _isControlling;
-    private int _controllingId;
-    private int _userId;
-    private int _controllerId;
 
     private ObservableCollection<ClipViewModel> _clips;
-
     public ObservableCollection<ClipViewModel> Clips
     {
         get => _clips; 
@@ -149,22 +144,6 @@ public class MainWindowViewModel : ViewModelBase
         set => SetField(ref _currentTimestamp, value);
     }
     
-    private bool _canGoPrevVideo;
-    public bool CanGoPrevVideo
-    {
-        get => _canGoPrevVideo;
-        set => SetField(ref _canGoPrevVideo, value);
-
-    }
-    
-    private bool _canGoNextVideo;
-    public bool CanGoNextVideo
-    {
-        get => _canGoNextVideo;
-        set => SetField(ref _canGoNextVideo, value);
-
-    }
-
     private int _videoVolume;
     public int VideoVolume
     {
@@ -227,13 +206,18 @@ public class MainWindowViewModel : ViewModelBase
     public RelayCommand OpenSettingsWindowCommand { get; private set; }
     public RelayCommand OpenUploadWindowCommand { get; private set; }
     public RelayCommand OpenFlyoutCommand { get; private set; }
+    public RelayCommand TogglePlaybackCommand { get; private set; }
+    public RelayCommand SkipFiveSecondsBackCommand { get; private set; }
+    public RelayCommand SkipFiveSecondsForwardCommand { get; private set; }
 
     public MainWindowViewModel()
     {
+        _clips = new ObservableCollection<ClipViewModel>();
+        _allTags = new ObservableCollection<string>();
         _uploadViewModel = new();
         GoBackDayCommand = new RelayCommand(GoBackDay, CanGoBackDay);
         GoForwardDayCommand = new RelayCommand(GoForwardDay, CanGoForwardDay);
-        GoBackCommand = new RelayCommand(CloseActiveClip);
+        GoBackCommand = new RelayCommand(CloseActiveClip, () => ShowingVideo);
         PlayVideoCommand = new RelayCommand(PlayVideo);
         PauseVideoCommand = new RelayCommand(PauseVideo);
         GoPrevVideoCommand = new RelayCommand(GoPrevVideo);
@@ -245,6 +229,9 @@ public class MainWindowViewModel : ViewModelBase
         DownloadClipCommand = new AsyncRelayCommand(DownloadClipAsync);
         DeleteClipCommand = new AsyncRelayCommand(DeleteClipAsync);
         OpenFlyoutCommand = new RelayCommand(() => IsFlyoutOpen = !IsFlyoutOpen);
+        TogglePlaybackCommand = new RelayCommand(TogglePlayback, () => ShowingVideo);
+        SkipFiveSecondsBackCommand = new RelayCommand(SkipFiveSecondsBack, () => ShowingVideo);
+        SkipFiveSecondsForwardCommand = new RelayCommand(SkipFiveSecondsForward, () => ShowingVideo);
         SelectedDateTime = DateTime.Now.Hour < 4 ? DateTime.Now.AddDays(-1) : DateTime.Now;
         Clips = new ObservableCollection<ClipViewModel>();
         AllTags = new ObservableCollection<string>();
@@ -261,8 +248,6 @@ public class MainWindowViewModel : ViewModelBase
         {
             StopPollWatchFolder();
         }
-
-        _userId = settings.UserId;
         
         //Cache users for clips to use
         Task.Run(ClipsRestService.GetAllUsersAsync);
@@ -275,7 +260,7 @@ public class MainWindowViewModel : ViewModelBase
     
     private void MediaPlayerOnTimeChanged(object? sender, MediaPlayerTimeChangedEventArgs e)
     {
-        VideoProgress = ((double)MediaPlayer.Time / (double)MediaPlayer.Length) * 100;
+        VideoProgress = ((double)MediaPlayer.Time / MediaPlayer.Length) * 100d;
         double minutes = Math.Floor(MediaPlayer.Time / (1000d * 60)); 
         double seconds = Math.Floor((MediaPlayer.Time % (1000d * 60)) / 1000d);
         string minutesString = (minutes < 10 ? "0" : "") + minutes;
@@ -352,21 +337,45 @@ public class MainWindowViewModel : ViewModelBase
 
     public void GoPrevVideo()
     {
+        if (SelectedClip == null)
+        {
+            return;
+        }
+        
         int idx = Clips.IndexOf(SelectedClip);
         CloseActiveClip();
         if (idx > 0)
         {
+            ClipViewModel next = Clips[idx + 1];
+            if (!next.ClipInfo.Watched)
+            {
+                next.ClipInfo.Watched = true;
+                next.IsWatched = true;
+                LocalDbService.SetInfoForClipId(next.ClipInfo);
+            }
             OpenClipForPlay(Clips[idx - 1]);
         }
     }
 
     public void GoNextVideo()
     {
+        if (SelectedClip == null)
+        {
+            return;
+        }
+        
         int idx = Clips.IndexOf(SelectedClip);
         CloseActiveClip();
         if (idx < Clips.Count - 1)
         {
-            OpenClipForPlay(Clips[idx + 1]);
+            ClipViewModel next = Clips[idx + 1];
+            if (!next.ClipInfo.Watched)
+            {
+                next.ClipInfo.Watched = true;
+                next.IsWatched = true;
+                LocalDbService.SetInfoForClipId(next.ClipInfo);
+            }
+            OpenClipForPlay(next);
         }
     }
     
@@ -383,7 +392,7 @@ public class MainWindowViewModel : ViewModelBase
                 Clips.Add(new ClipViewModel(OpenClipForPlay, x) { ClipOwner = user });
             });
             Rows = (int)Math.Ceiling(clips.Count / 4d);
-            Clips = new ObservableCollection<ClipViewModel>(Clips.OrderBy(x => x.Clip.CreatedOn.Time));
+            Clips = new ObservableCollection<ClipViewModel>(Clips.OrderBy(x => x.Clip.CreatedOn?.Time));
         });
         NoClipsForDate = clips.Count == 0;
     }
@@ -392,8 +401,17 @@ public class MainWindowViewModel : ViewModelBase
     {
         if(tag is not null && SelectedClip is not null)
         {
-            SelectedClip.Tags.Add(tag);
-            await SelectedClip.SaveClipAsync();
+            if (!SelectedClip.Tags.Contains(tag))
+            {
+                SelectedClip.Tags.Add(tag);
+                await SelectedClip.SaveClipAsync();
+                if (!AllTags.Contains(tag))
+                {
+                    AllTags.Clear();
+                    List<Tag> allTags = await ClipsRestService.GetAllTagsAsync();
+                    allTags.ForEach(t => AllTags.Add(t.Name));
+                }
+            }
         }
     }
 
@@ -401,8 +419,10 @@ public class MainWindowViewModel : ViewModelBase
     {
         if(tag is not null && SelectedClip is not null)
         {
-            SelectedClip.Tags.Remove(tag);
-            await SelectedClip.SaveClipAsync();
+            if (SelectedClip.Tags.Remove(tag))
+            {
+                await SelectedClip.SaveClipAsync();
+            }
         }
     }
     
@@ -419,8 +439,6 @@ public class MainWindowViewModel : ViewModelBase
         {
             StopPollWatchFolder();
         }
-
-        _userId = settings.UserId;
     }
 
     private void OpenUploadWindow()
@@ -483,7 +501,36 @@ public class MainWindowViewModel : ViewModelBase
         }
         
         await ClipsRestService.DeleteClipAsync(SelectedClip.Clip.Id);
+        if (ShowingVideo)
+        {
+            GoNextVideo();
+        }
         Clips.Remove(SelectedClip);
-        CloseActiveClip();
+    }
+    
+    private void TogglePlayback()
+    {
+        if (IsPlaying)
+        {
+            PauseVideo();
+        }
+        else
+        {
+            PlayVideo();
+        }
+    }
+    
+    private void SkipFiveSecondsBack()
+    {
+        PauseVideo();
+        MediaPlayer.Time -= 5000;
+        PlayVideo();
+    }
+    
+    private void SkipFiveSecondsForward()
+    {
+        PauseVideo();
+        MediaPlayer.Time += 5000;
+        PlayVideo();
     }
 }

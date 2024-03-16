@@ -10,11 +10,18 @@
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
+             KeyDown="ClipVideoView_OnKeyDown"
              d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:BoolToInverseVisibilityConverter x:Key="BoolToInverseVisibilityConverter"/>
     </UserControl.Resources>
+    <UserControl.InputBindings>
+        <KeyBinding Key="Space" Command="{Binding TogglePlaybackCommand}"/>
+        <KeyBinding Key="Left" Command="{Binding SkipFiveSecondsBackCommand}"/>
+        <KeyBinding Key="Right" Command="{Binding SkipFiveSecondsForwardCommand}"/>
+        <KeyBinding Key="Escape" Command="{Binding GoBackCommand}"/>
+    </UserControl.InputBindings>
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -27,7 +34,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <ui:SymbolIcon Grid.Column="0" Symbol="ArrowLeft24" FontSize="24" PreviewMouseDown="BackIconPressed" HorizontalAlignment="Left"/>
+            <ui:SymbolIcon Grid.Column="0" Symbol="ArrowLeft24" FontSize="24" PreviewMouseDown="BackIconPressed" HorizontalAlignment="Left" Cursor="Hand"/>
             <TextBlock Grid.Column="1" Text="{Binding SelectedClip.Clip.Filename, FallbackValue={x:Static system:String.Empty}}" HorizontalAlignment="Center"/>
         </Grid>
         <vlc:VideoView Grid.Row="1" MediaPlayer="{Binding MediaPlayer}" Margin="20"/>
