@@ -65,7 +65,7 @@ public class UnsavedClipModel() : ViewModelBase
         Status = "ready to upload";
     }
 
-    public async Task UploadClipAsync()
+    public async Task UploadClipAsync(bool throttleUpload = false)
     {
         IsFinishedUploading = false;
         HasStartedUploading = true;
