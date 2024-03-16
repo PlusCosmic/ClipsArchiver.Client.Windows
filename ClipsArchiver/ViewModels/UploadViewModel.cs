@@ -68,6 +68,6 @@ public class UploadViewModel : ViewModelBase
         UnsavedClipModel model = new(filename);
         LocalDbService.SetInfoForFileName(new LocalClipInfo{ FileName = Path.GetFileName(filename), Watched = false, ClipId = -1 });
         Application.Current.Dispatcher.Invoke(() => UnsavedClipModels.Add(model));
-        await model.UploadClipAsync();
+        await model.UploadClipAsync(true);
     }
 }
