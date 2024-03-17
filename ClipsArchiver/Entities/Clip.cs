@@ -12,6 +12,10 @@ public class Clip
     public bool IsProcessed { get; set; }
     public NullTime? CreatedOn { get; set; }
     public int Duration { get; set; }
+    public NullInt Map { get; set; }
+    public NullString? GameMode { get; set; }
+    public NullInt Legend { get; set; }
+    public bool MatchHistoryFound { get; set; }
     public List<string> Tags { get; set; } = new();
     public string VideoUri { get; set; } = string.Empty;
     public string ThumbnailUri { get; set; } = string.Empty;

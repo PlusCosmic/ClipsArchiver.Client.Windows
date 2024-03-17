@@ -383,13 +383,15 @@ public class MainWindowViewModel : ViewModelBase
     {
         List<Clip> clips = await ClipsRestService.GetClipsForDateAsync(SelectedDateTime);
         List<User> users = await ClipsRestService.GetAllUsersAsync();
+        List<Map> maps = await ClipsRestService.GetAllMapsAsync();
+        List<Legend> legends = await ClipsRestService.GetAllLegendsAsync();
         Application.Current.Dispatcher.Invoke(() =>
         {
             Clips.Clear();
             clips.ForEach(x =>
             {
                 User user = users.FirstOrDefault(u => u.Id == x.OwnerId) ?? new User();
-                Clips.Add(new ClipViewModel(OpenClipForPlay, x) { ClipOwner = user });
+                Clips.Add(new ClipViewModel(OpenClipForPlay, x, maps, legends) { ClipOwner = user });
             });
             Rows = (int)Math.Ceiling(clips.Count / 4d);
             Clips = new ObservableCollection<ClipViewModel>(Clips.OrderBy(x => x.Clip.CreatedOn?.Time));
