@@ -15,10 +15,21 @@
         <converters:ValueNullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
         <converters:ValueNullToInverseVisibilityConverter x:Key="NullToInverseVisibilityConverter"/>
     </UserControl.Resources>
-    <Border CornerRadius="5" Background="{DynamicResource LayerFillColorDefaultBrush}" Margin="10">
+    <Border CornerRadius="5" Margin="10">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <ImageBrush Opacity="0.1" Stretch="UniformToFill" ImageSource="{Binding SelectedClip.MapUri}"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Border.Style>
         <Grid>
             <Grid VerticalAlignment="Stretch" Margin="10" Visibility="{Binding SelectedClip, Converter={StaticResource NullToInverseVisibilityConverter}}">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -36,30 +47,63 @@
                     <ui:TextBlock Grid.Column="0" Text="Uploaded by:" Appearance="Secondary" FontTypography="BodyStrong"/>
                     <ui:TextBlock Grid.Column="1" Text="{Binding SelectedClip.ClipOwner.Name, FallbackValue={x:Static system:String.Empty}}" Appearance="Secondary" FontTypography="BodyStrong"/>
                 </Grid>
-                <ui:TextBlock Grid.Row="2" Text="Tags" Appearance="Primary" FontTypography="BodyStrong" Margin="0,10"/>
-                <ItemsControl Grid.Row="3" ItemsSource="{Binding SelectedClip.Tags}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <controls:Tag Margin="2"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <ui:AutoSuggestBox x:Name="AutoSuggestBox" Grid.Row="4"
-                                   PlaceholderText="Add Tag..." Margin="10" 
-                                   OriginalItemsSource="{Binding AllTags}"
-                                   UpdateTextOnSelect="True"
-                                   KeyDown="AutoSuggestBox_OnKeyDown">
-                    <ui:AutoSuggestBox.Icon>
-                        <ui:SymbolIcon Symbol="Search24" Cursor="Hand" MouseDown="UIElement_OnMouseDown">
-                        </ui:SymbolIcon>
-                    </ui:AutoSuggestBox.Icon>
-                </ui:AutoSuggestBox>
-                <Grid Grid.Row="6">
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ui:TextBlock Grid.Column="0" Text="Gamemode:" Appearance="Secondary" FontTypography="BodyStrong"/>
+                    <ui:TextBlock Grid.Column="1" Text="{Binding SelectedClip.Clip.GameMode.String, FallbackValue={x:Static system:String.Empty}}" Appearance="Secondary" FontTypography="BodyStrong"/>
+                </Grid>
+                <Grid Grid.Row="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ui:TextBlock Grid.Column="0" Text="Map:" Appearance="Secondary" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding SelectedClip.AllMaps}"
+                              SelectedItem="{Binding SelectedClip.SelectedMap}" />
+                </Grid>
+                <Grid Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ui:TextBlock Grid.Column="0" Text="Legend:" Appearance="Secondary" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding SelectedClip.AllLegends}"
+                              SelectedItem="{Binding SelectedClip.SelectedLegend}"/>
+                </Grid>
+                <Image Grid.Row="5" Source="{Binding SelectedClip.LegendUri}" Width="134" Height="150"/>
+                <ui:TextBlock Grid.Row="6" Text="Tags" Appearance="Primary" FontTypography="BodyStrong" Margin="0,10"/>
+                <Grid Grid.Row="7">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <ItemsControl Grid.Row="0" ItemsSource="{Binding SelectedClip.Tags}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <controls:Tag Margin="2"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <ui:AutoSuggestBox x:Name="AutoSuggestBox" Grid.Row="1"
+                                       PlaceholderText="Add Tag..." Margin="10" 
+                                       OriginalItemsSource="{Binding AllTags}"
+                                       UpdateTextOnSelect="True"
+                                       KeyDown="AutoSuggestBox_OnKeyDown">
+                        <ui:AutoSuggestBox.Icon>
+                            <ui:SymbolIcon Symbol="Search24" Cursor="Hand" MouseDown="UIElement_OnMouseDown">
+                            </ui:SymbolIcon>
+                        </ui:AutoSuggestBox.Icon>
+                    </ui:AutoSuggestBox>
+                </Grid>
+                <Grid Grid.Row="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />

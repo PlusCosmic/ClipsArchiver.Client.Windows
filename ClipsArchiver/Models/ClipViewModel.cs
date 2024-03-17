@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Media.Imaging;
 using ClipsArchiver.Entities;
 using ClipsArchiver.Services;
@@ -21,6 +22,8 @@ public class ClipViewModel : ViewModelBase
     }
 
     private Clip _clip;
+    private readonly List<Map> _allMaps;
+    private readonly List<Legend> _allLegends;
 
     public Clip Clip
     {
@@ -69,15 +72,75 @@ public class ClipViewModel : ViewModelBase
         get => _tags;
         set => SetField(ref _tags, value);
     }
+    
+    public ObservableCollection<Map> AllMaps { get; set; }
+    public ObservableCollection<Legend> AllLegends { get; set; }
+    
+    private Map _selectedMap;
+    public Map SelectedMap
+    {
+        get => _selectedMap;
+        set
+        {
+            if (SetField(ref _selectedMap, value))
+            {
+                if (!_clip.Map.Valid || SelectedMap.Id != _clip.Map?.Int32)
+                {
+                    _clip.Map = new NullInt();
+                    _clip.Map.Int32 = SelectedMap.Id;
+                    _clip.Map.Valid = true;
+                    UpdateClipAsync().RunSynchronously();
+                }
+            }
+        } 
+    }
 
+    private Legend _selectedLegend;
+    public Legend SelectedLegend
+    {
+        get => _selectedLegend;
+        set
+        {
+            if (SetField(ref _selectedLegend, value))
+            {
+                if (!_clip.Legend.Valid || SelectedLegend.Id != _clip.Legend?.Int32)
+                {
+                    _clip.Legend = new NullInt();
+                    _clip.Legend.Int32 = SelectedLegend.Id;
+                    _clip.Legend.Valid = true;
+                    Task.Run(async () => await UpdateClipAsync());
+                }
+            }
+        } 
+    }
+    
     public string ClipName => $"Clip #{Clip.Id}";
     public string UploadedBy => $"Uploaded by: {ClipOwner?.Name}";
+
+    private string _mapUri;
+
+    public string MapUri
+    {
+        get => _mapUri;
+        set => SetField(ref _mapUri, value);
+    }
+
+    private string _legendUri;
+    public string LegendUri 
+    {
+        get => _legendUri;
+        set => SetField(ref _legendUri, value);
+    }
     
     public RelayCommand<ClipViewModel> ShowVideoCommand { get; private set; }
     
-    public ClipViewModel(Action<ClipViewModel> openClipAction, Clip clip)
+    public ClipViewModel(Action<ClipViewModel> openClipAction, Clip clip, List<Map> allMaps, List<Legend> allLegends)
     {
         _clip = clip;
+        _allMaps = allMaps;
+        _allLegends = allLegends;
+        AllMaps = new ObservableCollection<Map>(_allMaps);
+        AllLegends = new ObservableCollection<Legend>(_allLegends);
         _videoUri = new Uri(clip.VideoUri);
         _thumbnail = new BitmapImage(new Uri(clip.ThumbnailUri));
         ShowVideoCommand = new RelayCommand<ClipViewModel>(ShowVideo);
@@ -86,6 +149,16 @@ public class ClipViewModel : ViewModelBase
         IsWatched = ClipInfo.Watched;
         _tags = new ObservableCollection<string>();
         clip.Tags?.ForEach(t => Tags.Add(t));
+        if (_clip.Map?.Valid ?? false)
+        {
+            SelectedMap = _allMaps.First(m => m.Id == _clip.Map.Int32);
+            MapUri = $"http://10.0.0.10:8080/resources/{SelectedMap.CardImage}";
+        }
+        if (_clip.Legend?.Valid ?? false)
+        {
+            SelectedLegend = _allLegends.First(l => l.Id == _clip.Legend.Int32);
+            LegendUri = $"http://10.0.0.10:8080/resources/{SelectedLegend.CardImage}";
+        }
     }
     
     private void ShowVideo(ClipViewModel? model)
@@ -109,5 +182,21 @@ public class ClipViewModel : ViewModelBase
     {
         _clip.Tags = Tags.ToList();
         await ClipsRestService.UpdateClipAsync(_clip);
+    }
+
+    public async Task UpdateClipAsync()
+    {
+        await ClipsRestService.UpdateClipAsync(_clip);
+        Clip newClip = await ClipsRestService.GetClipByIdAsync(_clip.Id);
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            Clip = newClip;
+            Tags.Clear();
+            newClip.Tags?.ForEach(t => Tags.Add(t));
+            SelectedMap = _allMaps.First(m => m.Id == _clip.Map.Int32);
+            MapUri = $"http://10.0.0.10:8080/resources/{SelectedMap.CardImage}";
+            SelectedLegend = _allLegends.First(l => l.Id == _clip.Legend.Int32);
+            LegendUri = $"http://10.0.0.10:8080/resources/{SelectedLegend.CardImage}";
+        });
     }
 }
