@@ -186,6 +186,10 @@ public class ClipViewModel : ViewModelBase
 
     public async Task UpdateClipAsync()
     {
+        if (_clip.Map.Valid || _clip.Legend.Valid)
+        {
+            _clip.MatchHistoryFound = true;
+        }
         await ClipsRestService.UpdateClipAsync(_clip);
         Clip newClip = await ClipsRestService.GetClipByIdAsync(_clip.Id);
         Application.Current.Dispatcher.Invoke(() =>
