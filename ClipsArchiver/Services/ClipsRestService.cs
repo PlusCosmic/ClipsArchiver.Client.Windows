@@ -68,7 +68,7 @@ public class ClipsRestService
 
             MultipartFormDataContent content = new MultipartFormDataContent();
             content.Add(
-                new StringContent($"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour}-{dateTime.Minute}"),
+                new StringContent($"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour}-{dateTime.Minute}-{dateTime.Second}"),
                 "creationDateTime");
             content.Add(new StreamContent(stream), "file", Path.GetFileName(clipPath));
             HttpResponseMessage response = await _httpClient.PostAsync($"/clips/upload/{userId}", content);
@@ -118,6 +118,28 @@ public class ClipsRestService
         var jsonResponse = await response.Content.ReadAsStringAsync();
         return JsonConvert.DeserializeObject<List<Tag>>(jsonResponse) ?? [];
     }
+    
+    public static async Task<List<Map>> GetAllMapsAsync()
+    {
+        Log.Debug($"Getting all maps");
+        using HttpResponseMessage response = await _httpClient.GetAsync("maps");
+        Log.Debug($"Got response: {response.StatusCode}");
+        response.EnsureSuccessStatusCode();
+
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<List<Map>>(jsonResponse) ?? [];
+    }
+    
+    public static async Task<List<Legend>> GetAllLegendsAsync()
+    {
+        Log.Debug($"Getting all legends");
+        using HttpResponseMessage response = await _httpClient.GetAsync("legends");
+        Log.Debug($"Got response: {response.StatusCode}");
+        response.EnsureSuccessStatusCode();
+
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<List<Legend>>(jsonResponse) ?? [];
+    }
 
     public static async Task<QueueEntry?> GetQueueEntryByClipIdAsync(int clipId)
     {
@@ -163,5 +185,14 @@ public class ClipsRestService
         await using Stream contentStream = await response.Content.ReadAsStreamAsync();
         await using FileStream fileStream = new(savePath, FileMode.Create, FileAccess.Write, FileShare.None);
         await contentStream.CopyToAsync(fileStream);
+    }
+    
+    public static async Task<Clip> GetClipByIdAsync(int clipId)
+    {
+        Log.Debug($"Getting clip with id: {clipId}");
+        using HttpResponseMessage response = await _httpClient.GetAsync($"clips/{clipId}");
+        response.EnsureSuccessStatusCode();
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<Clip>(jsonResponse) ?? throw new ClipNotFoundException();
     }
 }
