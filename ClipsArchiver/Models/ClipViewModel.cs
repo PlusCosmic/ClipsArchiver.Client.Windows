@@ -131,6 +131,20 @@ public class ClipViewModel : ViewModelBase
         get => _legendUri;
         set => SetField(ref _legendUri, value);
     }
+
+    private int _startTime;
+    public int StartTime
+    {
+        get => _startTime;
+        set => SetField(ref _startTime, value);
+    }
+    
+    private int _endTime;
+    public int EndTime
+    {
+        get => _endTime;
+        set => SetField(ref _endTime, value);
+    }
     
     public RelayCommand<ClipViewModel> ShowVideoCommand { get; private set; }
     
@@ -159,6 +173,9 @@ public class ClipViewModel : ViewModelBase
             SelectedLegend = _allLegends.First(l => l.Id == _clip.Legend.Int32);
             LegendUri = $"http://10.0.0.10:8080/resources/{SelectedLegend.CardImage}";
         }
+
+        StartTime = 0;
+        EndTime = Clip.Duration;
     }
     
     private void ShowVideo(ClipViewModel? model)
