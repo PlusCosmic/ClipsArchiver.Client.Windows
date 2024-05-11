@@ -20,6 +20,7 @@ public class UploadViewModel : ViewModelBase
     }
 
     public RelayCommand OpenFileDialogCommand { get; private set; }
+    public RelayCommand ClearCompletedCommand { get; private set; }
     public AsyncRelayCommand UploadClipsCommand { get; private set; }
     public RelayCommand<FluentWindow> CloseWindowCommand { get; private set; }
     
@@ -27,6 +28,7 @@ public class UploadViewModel : ViewModelBase
     {
         _unsavedClipModels = new ObservableCollection<UnsavedClipModel>();
         OpenFileDialogCommand = new RelayCommand(OpenFileDialog);
+        ClearCompletedCommand = new RelayCommand(ClearCompleted);
         UploadClipsCommand = new AsyncRelayCommand(UploadClips);
         CloseWindowCommand = new RelayCommand<FluentWindow>(CloseWindow);
     }
@@ -46,11 +48,24 @@ public class UploadViewModel : ViewModelBase
             }
         }
     }
+    
+    private void ClearCompleted()
+    {
+        List<UnsavedClipModel> completedClips = UnsavedClipModels.Where(x => x.IsFinishedUploading || x.FailedUpload).ToList();
+        foreach (var completedClip in completedClips)
+        {
+            completedClip.IsMarkedForRemoval = true;
+        }
+    }
 
     private async Task UploadClips()
     {
         foreach (var unsavedClipModel in UnsavedClipModels)
         {
+            if (unsavedClipModel.IsMarkedForRemoval)
+            {
+                continue;
+            }
             await unsavedClipModel.UploadClipAsync().ConfigureAwait(false);
         }
     }
