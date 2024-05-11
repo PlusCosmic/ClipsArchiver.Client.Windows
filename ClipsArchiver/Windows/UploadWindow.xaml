@@ -7,6 +7,7 @@
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  xmlns:viewModels="clr-namespace:ClipsArchiver.ViewModels"
                  xmlns:controls="clr-namespace:ClipsArchiver.Controls"
+                 xmlns:converters="clr-namespace:NKristek.Wpf.Converters;assembly=NKristek.Wpf.Converters"
                  Icon="/Resources/clipsarchiver.ico"
                  ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
                  ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -14,6 +15,10 @@
                  d:DataContext="{d:DesignInstance viewModels:UploadViewModel}"
                  Height="460" Width="840"
                  d:DesignHeight="320" d:DesignWidth="540">
+    <ui:FluentWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:BoolToInverseVisibilityConverter x:Key="BoolToInverseVisibilityConverter"/>
+    </ui:FluentWindow.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -31,13 +36,14 @@
             <ItemsControl ItemsSource="{Binding UnsavedClipModels}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <controls:UnsavedClip Margin="12" />
+                        <controls:UnsavedClip Margin="12" Visibility="{Binding IsMarkedForRemoval, Converter={StaticResource BoolToInverseVisibilityConverter}}"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -48,12 +54,17 @@
                     <ui:SymbolIcon Symbol="FolderAdd24" />
                 </ui:Button.Icon>
             </ui:Button>
-            <ui:Button Grid.Column="2" Content="Upload" Margin="12" Command="{Binding UploadClipsCommand}">
+            <ui:Button Grid.Column="1" Content="Clear Completed" Margin="12" Command="{Binding ClearCompletedCommand}">
+                <ui:Button.Icon>
+                    <ui:SymbolIcon Symbol="Broom24" />
+                </ui:Button.Icon>
+            </ui:Button>
+            <ui:Button Grid.Column="3" Content="Upload" Margin="12" Command="{Binding UploadClipsCommand}">
                 <ui:Button.Icon>
                     <ui:SymbolIcon Symbol="ArrowUpload24" />
                 </ui:Button.Icon>
             </ui:Button>
-            <ui:Button Grid.Column="3" Content="Close" Margin="12" Command="{Binding CloseWindowCommand}"
+            <ui:Button Grid.Column="4" Content="Close" Margin="12" Command="{Binding CloseWindowCommand}"
                        CommandParameter="{Binding RelativeSource={ RelativeSource FindAncestor, AncestorType={ x:Type Window}}}">
                 <ui:Button.Icon>
                     <ui:SymbolIcon Symbol="Dismiss24" />

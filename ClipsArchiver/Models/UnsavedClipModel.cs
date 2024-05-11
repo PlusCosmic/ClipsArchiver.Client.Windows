@@ -57,6 +57,14 @@ public class UnsavedClipModel() : ViewModelBase
         set => SetField(ref _failedUpload, value);
     }
 
+    private bool _isMarkedForRemoval;
+    
+    public bool IsMarkedForRemoval
+    {
+        get => _isMarkedForRemoval;
+        set => SetField(ref _isMarkedForRemoval, value);
+    }
+
     public UnsavedClipModel(string localFilePath) : this()
     {
         _localFilePath = localFilePath;
