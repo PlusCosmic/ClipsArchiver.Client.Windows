@@ -65,8 +65,12 @@ public class UnsavedClipModel() : ViewModelBase
         Status = "ready to upload";
     }
 
-    public async Task UploadClipAsync(bool throttleUpload = false)
+    public async Task UploadClipAsync(bool fromBackground = false)
     {
+        if (fromBackground)
+        {
+            ToastNotificationService.ShowInfoNotification("Background Upload", $"Uploading {_localFilename}");
+        }
         IsFinishedUploading = false;
         HasStartedUploading = true;
         Status = "uploading";
@@ -113,6 +117,7 @@ public class UnsavedClipModel() : ViewModelBase
         if (queueEntry?.Status == "finished")
         {
             IsFinishedUploading = true;
+            ToastNotificationService.ShowSuccessNotification("Success", $"Uploaded {_localFilename}");
             _timer?.Stop();
         }
     }
