@@ -37,7 +37,7 @@ public class ClipsRestService
         return JsonConvert.DeserializeObject<List<Clip>>(jsonResponse) ?? [];
     }
 
-    public static async Task<Clip> UploadClipAsync(string clipPath, int userId, bool throttleUpload = true, int retryCount = 0)
+    public static async Task<Clip> UploadClipAsync(string clipPath, int userId, int retryCount = 0)
     {
         try
         {
@@ -53,11 +53,7 @@ public class ClipsRestService
             }
 
             Stream stream = File.OpenRead(clipPath);
-            if (throttleUpload)
-            {
-                stream = new ThrottledStream(stream, 50000);
-            }
-
+            
             if (FileTypeDetector.DetectFileType(stream) != FileType.Mp4)
             {
                 stream.Close();
@@ -89,7 +85,7 @@ public class ClipsRestService
                 throw;
             }
             Log.Error(ex, "Error uploading clip, retrying");
-            return await UploadClipAsync(clipPath, userId, throttleUpload, retryCount + 1);
+            return await UploadClipAsync(clipPath, userId, retryCount + 1);
         }
         
     }
@@ -194,5 +190,21 @@ public class ClipsRestService
         response.EnsureSuccessStatusCode();
         var jsonResponse = await response.Content.ReadAsStringAsync();
         return JsonConvert.DeserializeObject<Clip>(jsonResponse) ?? throw new ClipNotFoundException();
+    }
+    
+    public static async Task TrimClipAsync(TrimRequest trimRequest)
+    {
+        Log.Debug($"Trimming clip with id: {trimRequest.ClipId}");
+        using HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"clips/trim/{trimRequest.ClipId}", trimRequest);
+        response.EnsureSuccessStatusCode();
+    }
+    
+    public static async Task<TrimRequest> GetTrimRequestByClipIdAsync(int clipId)
+    {
+        Log.Debug($"Getting trim request for clip with id: {clipId}");
+        using HttpResponseMessage response = await _httpClient.GetAsync($"clips/trim/{clipId}");
+        response.EnsureSuccessStatusCode();
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<TrimRequest>(jsonResponse);
     }
 }

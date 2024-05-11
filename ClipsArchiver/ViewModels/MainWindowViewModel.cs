@@ -203,6 +203,7 @@ public class MainWindowViewModel : ViewModelBase
     public AsyncRelayCommand DeleteClipCommand { get; private set; }
     public AsyncRelayCommand<string> AddTagToSelectedClipCommand { get; private set; }
     public AsyncRelayCommand<string> RemoveTagFromSelectedClipCommand { get; private set; }
+    public AsyncRelayCommand TrimSelectedClipCommand { get; private set; }
     public RelayCommand OpenSettingsWindowCommand { get; private set; }
     public RelayCommand OpenUploadWindowCommand { get; private set; }
     public RelayCommand OpenFlyoutCommand { get; private set; }
@@ -228,6 +229,7 @@ public class MainWindowViewModel : ViewModelBase
         OpenUploadWindowCommand = new RelayCommand(OpenUploadWindow);
         DownloadClipCommand = new AsyncRelayCommand(DownloadClipAsync);
         DeleteClipCommand = new AsyncRelayCommand(DeleteClipAsync);
+        TrimSelectedClipCommand = new AsyncRelayCommand(TrimSelectedClipAsync);
         OpenFlyoutCommand = new RelayCommand(() => IsFlyoutOpen = !IsFlyoutOpen);
         TogglePlaybackCommand = new RelayCommand(TogglePlayback, () => ShowingVideo);
         SkipFiveSecondsBackCommand = new RelayCommand(SkipFiveSecondsBack, () => ShowingVideo);
@@ -257,8 +259,8 @@ public class MainWindowViewModel : ViewModelBase
             allTags.ForEach(t => AllTags.Add(t.Name));
         });
     }
-    
-    private void MediaPlayerOnTimeChanged(object? sender, MediaPlayerTimeChangedEventArgs e)
+
+    public void UpdateOnTimeChanged()
     {
         VideoProgress = ((double)MediaPlayer.Time / MediaPlayer.Length) * 100d;
         double minutes = Math.Floor(MediaPlayer.Time / (1000d * 60)); 
@@ -266,6 +268,11 @@ public class MainWindowViewModel : ViewModelBase
         string minutesString = (minutes < 10 ? "0" : "") + minutes;
         string secondsString = (seconds < 10 ? "0" : "") + seconds;
         CurrentTimestamp = $"{minutesString}:{secondsString}";
+    }
+    
+    private void MediaPlayerOnTimeChanged(object? sender, MediaPlayerTimeChangedEventArgs e)
+    {
+        UpdateOnTimeChanged();
     }
 
     private void GoBackDay()
@@ -472,13 +479,10 @@ public class MainWindowViewModel : ViewModelBase
     {
         Settings settings = SettingsService.GetSettings();
         var newFiles = LocalFileService.GetNewFilesInClipsDir();
-        List<Task> tasks = new();
         foreach (var newFile in newFiles)
         {
-            tasks.Add(_uploadViewModel.AddNewClipAndUploadAsync(settings.ClipsPath + "\\" + newFile));
+            await _uploadViewModel.AddNewClipAndUploadAsync(settings.ClipsPath + "\\" + newFile).ConfigureAwait(false);
         }
-
-        await Task.WhenAll(tasks);
     }
 
     private async Task DownloadClipAsync()
@@ -534,5 +538,22 @@ public class MainWindowViewModel : ViewModelBase
         PauseVideo();
         MediaPlayer.Time += 5000;
         PlayVideo();
+    }
+
+    private async Task TrimSelectedClipAsync()
+    {
+        if (SelectedClip == null)
+        {
+            return;
+        }
+        TrimRequest request = new();
+        request.ClipId = SelectedClip.Clip.Id;
+        request.DesiredStartTime = new NullInt();
+        request.DesiredStartTime.Valid = true;
+        request.DesiredStartTime.Int32 = SelectedClip.StartTime;
+        request.DesiredEndTime = new NullInt();
+        request.DesiredEndTime.Valid = true;
+        request.DesiredEndTime.Int32 = SelectedClip.EndTime;
+        await ClipsRestService.TrimClipAsync(request);
     }
 }
