@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using ClipsArchiver.ViewModels;
 
@@ -28,6 +29,7 @@ public partial class ClipVideoView : UserControl
             return;
         }
         viewModel.IsScrubbing = true;
+        
     }
 
     private void SliderMouseUp(object sender, MouseButtonEventArgs e)
@@ -36,10 +38,27 @@ public partial class ClipVideoView : UserControl
         {
             return;
         }
+
+        Track track = GetTrack(SliderTimeLine);
+        ModifiyTrack(track, e.MouseDevice);
         viewModel.IsScrubbing = false;
     }
 
-    private void ClipVideoView_OnKeyDown(object sender, KeyEventArgs e)
+    private static Track GetTrack(Slider slider)
     {
+        return slider.Template.FindName("PART_Track", slider) as Track;
+    }
+
+    private void ModifiyTrack(Track track, MouseDevice mouseDevice)
+    {
+        if (track != null && track.Thumb != null && !track.Thumb.IsMouseOver)
+        {
+            // Move Thumb to the Mouse location
+
+            Point pt = mouseDevice.GetPosition(track);
+
+            double newValue = track.ValueFromPoint(pt);
+            SliderTimeLine.Value = newValue;
+        }
     }
 }

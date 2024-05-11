@@ -10,7 +10,6 @@
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
-             KeyDown="ClipVideoView_OnKeyDown"
              d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -48,7 +47,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Slider Grid.Column="0" Value="{Binding VideoProgress}" Minimum="0" Maximum="100" PreviewMouseDown="SliderMouseDown" PreviewMouseUp="SliderMouseUp" IsMoveToPointEnabled="True" Margin="12"/>
+                <Slider Name="SliderTimeLine" Grid.Column="0" Value="{Binding VideoProgress}" Minimum="0" Maximum="100" PreviewMouseDown="SliderMouseDown" PreviewMouseUp="SliderMouseUp" IsMoveToPointEnabled="False" Margin="12"/>
                 <TextBlock Grid.Column="1" Text="{Binding CurrentTimestamp}" VerticalAlignment="Center" Width="40"/>
             </Grid>
             <Grid Grid.Row="1">
