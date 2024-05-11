@@ -77,7 +77,7 @@ public class ClipsRestService
             var jsonResponse = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<Clip>(jsonResponse) ?? throw new ErrorUploadException();
         }
-        catch (Exception ex)
+        catch (ErrorUploadException ex)
         {
             Thread.Sleep(1000 * 10);
             if (retryCount > 4)
