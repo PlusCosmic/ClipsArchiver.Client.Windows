@@ -16,6 +16,7 @@ public class MainWindowViewModel : ViewModelBase
 {
     private Timer? _timer;
     private readonly UploadViewModel _uploadViewModel;
+    private readonly HashSet<string> _knownFileNames;
 
     private ObservableCollection<ClipViewModel> _clips;
     public ObservableCollection<ClipViewModel> Clips
@@ -481,6 +482,11 @@ public class MainWindowViewModel : ViewModelBase
         var newFiles = LocalFileService.GetNewFilesInClipsDir();
         foreach (var newFile in newFiles)
         {
+            if (!_knownFileNames.Add(newFile))
+            {
+                continue;
+            }
+
             await _uploadViewModel.AddNewClipAndUploadAsync(settings.ClipsPath + "\\" + newFile).ConfigureAwait(false);
         }
     }
