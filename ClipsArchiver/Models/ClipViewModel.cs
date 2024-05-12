@@ -146,6 +146,10 @@ public class ClipViewModel : ViewModelBase
         set => SetField(ref _endTime, value);
     }
     
+    public bool IsGamePositive => Clip.BrScoreChange?.Int32 > 0;
+    public bool IsGameNegative => Clip.BrScoreChange?.Int32 < 0;
+    public bool IsGameNeutral => Clip.BrScoreChange?.Int32 == 0;
+    
     public RelayCommand<ClipViewModel> ShowVideoCommand { get; private set; }
     
     public ClipViewModel(Action<ClipViewModel> openClipAction, Clip clip, List<Map> allMaps, List<Legend> allLegends)

@@ -19,4 +19,6 @@ public class Clip
     public List<string> Tags { get; set; } = new();
     public string VideoUri { get; set; } = string.Empty;
     public string ThumbnailUri { get; set; } = string.Empty;
+    public NullString? BrRankImg { get; set; }
+    public NullInt? BrScoreChange { get; set; }
 }
