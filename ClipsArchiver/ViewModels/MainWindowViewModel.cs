@@ -236,6 +236,7 @@ public class MainWindowViewModel : ViewModelBase
         SkipFiveSecondsBackCommand = new RelayCommand(SkipFiveSecondsBack, () => ShowingVideo);
         SkipFiveSecondsForwardCommand = new RelayCommand(SkipFiveSecondsForward, () => ShowingVideo);
         SelectedDateTime = DateTime.Now.Hour < 4 ? DateTime.Now.AddDays(-1) : DateTime.Now;
+        _knownFileNames = new HashSet<string>();
         Clips = new ObservableCollection<ClipViewModel>();
         AllTags = new ObservableCollection<string>();
         _libVlc = new LibVLC();
