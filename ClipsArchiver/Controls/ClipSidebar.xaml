@@ -14,6 +14,8 @@
     <UserControl.Resources>
         <converters:ValueNullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
         <converters:ValueNullToInverseVisibilityConverter x:Key="NullToInverseVisibilityConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:BoolToInverseVisibilityConverter x:Key="BoolToInverseVisibilityConverter"/>
     </UserControl.Resources>
     <Border CornerRadius="5" Margin="10">
         <Border.Style>
@@ -40,21 +42,34 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <ui:TextBlock Grid.Row="0" Text="{Binding SelectedClip.Clip.Filename, FallbackValue={x:Static system:String.Empty}}" TextWrapping="Wrap" TextAlignment="Center" Appearance="Primary" FontTypography="Subtitle"/>
-                <Grid Grid.Row="1">
+                <Grid Grid.Row="1" Visibility="{Binding SelectedClip.IsGameNeutral, Converter={StaticResource BoolToInverseVisibilityConverter}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <ui:TextBlock Grid.Column="0" Text="Uploaded by:" Appearance="Secondary" FontTypography="BodyStrong"/>
-                    <ui:TextBlock Grid.Column="1" Text="{Binding SelectedClip.ClipOwner.Name, FallbackValue={x:Static system:String.Empty}}" Appearance="Secondary" FontTypography="BodyStrong"/>
+                    <Image Grid.Column="0" Source="{Binding SelectedClip.Clip.BrRankImg.String}" Width="64" Height="64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="{Binding SelectedClip.Clip.BrScoreChange.Int32, FallbackValue={x:Static system:String.Empty}}" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="20">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedClip.IsGamePositive}" Value="True" >
+                                        <Setter Property="Foreground" Value="ForestGreen"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedClip.IsGameNegative}" Value="True" >
+                                        <Setter Property="Foreground" Value="Red"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </Grid>
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <ui:TextBlock Grid.Column="0" Text="Gamemode:" Appearance="Secondary" FontTypography="BodyStrong"/>
-                    <ui:TextBlock Grid.Column="1" Text="{Binding SelectedClip.Clip.GameMode.String, FallbackValue={x:Static system:String.Empty}}" Appearance="Secondary" FontTypography="BodyStrong"/>
+                    <ui:TextBlock Grid.Column="0" Text="Uploaded by:" Appearance="Secondary" FontTypography="BodyStrong"/>
+                    <ui:TextBlock Grid.Column="1" Text="{Binding SelectedClip.ClipOwner.Name, FallbackValue={x:Static system:String.Empty}}" Appearance="Secondary" FontTypography="BodyStrong"/>
                 </Grid>
                 <Grid Grid.Row="3">
                     <Grid.ColumnDefinitions>
