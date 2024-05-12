@@ -1,4 +1,5 @@
 using System.Text;
+using ClipsArchiver.Entities;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -12,9 +13,11 @@ public static class RabbitMqService
     private static IModel? _consumeChannel;
     private static IConnection? _connection;
     private static string? _queueName;
+    private static string _mapUpdateNotificationQueueName = "map_update_notification_queue";
+    private static IModel? _mapUpdateNotificationQueueConsumeChannel;
     public static IEventAggregator EventAggregator { get; set; } = new EventAggregator();
     
-    private static void Init()
+    public static void Init()
     {
         var factory = new ConnectionFactory
         {
@@ -27,18 +30,29 @@ public static class RabbitMqService
         _connection = factory.CreateConnection();
         _publishChannel = _connection.CreateModel();
         _consumeChannel = _connection.CreateModel();
+        _mapUpdateNotificationQueueConsumeChannel = _connection.CreateModel();
         _publishChannel.ExchangeDeclare("clipsArchiverExchange", ExchangeType.Fanout);
         _consumeChannel.ExchangeDeclare("clipsArchiverExchange", ExchangeType.Fanout);
         _queueName = _consumeChannel.QueueDeclare().QueueName;
         _consumeChannel.QueueBind(queue: _queueName,
             exchange: "clipsArchiverExchange",
             routingKey: String.Empty);
+        _mapUpdateNotificationQueueConsumeChannel.QueueDeclare(queue: _mapUpdateNotificationQueueName, durable: true, exclusive: false, autoDelete: false);
+        /*_mapUpdateNotificationQueueConsumeChannel.QueueBind(queue: _mapUpdateNotificationQueueName,
+            exchange: "",
+            routingKey: string.Empty);*/
         
         var consumer = new EventingBasicConsumer(_consumeChannel);
         consumer.Received += Consume;
         _consumeChannel.BasicConsume(queue: _queueName,
             autoAck: true,
             consumer: consumer);
+        
+        var mapUpdateNotificationConsumer = new EventingBasicConsumer(_mapUpdateNotificationQueueConsumeChannel);
+        mapUpdateNotificationConsumer.Received += ConsumeMapUpdateNotifications;
+        _mapUpdateNotificationQueueConsumeChannel.BasicConsume(queue: _mapUpdateNotificationQueueName,
+            autoAck: true,
+            consumer: mapUpdateNotificationConsumer);
     }
     
     public static void Publish<T>(T payload)
@@ -65,5 +79,16 @@ public static class RabbitMqService
 
     private static void Consume(object? model, BasicDeliverEventArgs args)
     {
+    }
+    
+    private static void ConsumeMapUpdateNotifications(object? model, BasicDeliverEventArgs args)
+    {
+        string jsonString = Encoding.Default.GetString(args.Body);
+        var mapUpdateNotification = JsonConvert.DeserializeObject<MapUpdateNotification>(jsonString);
+        if (mapUpdateNotification?.MapName != null && mapUpdateNotification.DurationMinutes > 0)
+        {
+            ToastNotificationService.ShowInfoNotification("Map Changed",
+                $"The map has changed to {mapUpdateNotification.MapName} for the next {mapUpdateNotification.DurationMinutes} minutes.");
+        }
     }
 }

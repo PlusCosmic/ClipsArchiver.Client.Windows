@@ -259,6 +259,7 @@ public class MainWindowViewModel : ViewModelBase
             List<Tag> allTags = await ClipsRestService.GetAllTagsAsync();
             allTags.ForEach(t => AllTags.Add(t.Name));
         });
+        RabbitMqService.Init();
     }
 
     public void UpdateOnTimeChanged()

@@ -79,11 +79,11 @@
                     <ui:SymbolIcon Symbol="Speaker224" FontSize="24" Margin="12, 0"/>
                     <ui:SymbolIcon Symbol="SpeakerMute24" FontSize="24" Margin="12, 0"/>
                 </Grid>
-                <Slider Grid.Column="2" Width="40" Minimum="0" Maximum="100" Value="{Binding VideoVolume}"/>
+                <Slider Grid.Column="2" Width="40" Minimum="0" Maximum="100" Value="{Binding VideoVolume}" IsMoveToPointEnabled="True"/>
                 <Grid Grid.Column="4">
                     <ui:SymbolIcon Symbol="AnimalRabbit24" FontSize="24" Margin="12, 0"/>
                 </Grid>
-                <Slider Grid.Column="5" Width="40" Minimum="40" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Value="{Binding PlaybackSpeed}"/>
+                <Slider Grid.Column="5" Width="40" Minimum="40" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Value="{Binding PlaybackSpeed}" IsMoveToPointEnabled="True"/>
                 <ui:SymbolIcon Grid.Column="6" Symbol="Previous24" FontSize="24" Margin="12, 0" Cursor="Hand">
                     <ui:SymbolIcon.InputBindings>
                         <MouseBinding Gesture="LeftClick" Command="{Binding GoPrevVideoCommand}"/>
