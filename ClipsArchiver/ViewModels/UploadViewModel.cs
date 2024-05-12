@@ -77,6 +77,8 @@ public class UploadViewModel : ViewModelBase
 
     public async Task AddNewClipAndUploadAsync(string filename)
     {
+        // give the video time to save to disk
+        await Task.Delay(3000);
         UnsavedClipModel model = new(filename);
         LocalDbService.SetInfoForFileName(new LocalClipInfo{ FileName = Path.GetFileName(filename), Watched = false, ClipId = -1 });
         Application.Current.Dispatcher.Invoke(() => UnsavedClipModels.Add(model));
