@@ -46,7 +46,8 @@
                 <ui:ImageIcon Source="\Resources\clipsarchiver.png"/>
             </ui:TitleBar.Icon>
         </ui:TitleBar>
-        <controls:ClipSidebar Grid.Row="1" Grid.Column="0" />
+        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Background="#05ffffff" CornerRadius="5"/>
+        <controls:ClipSidebar Grid.Row="1" Grid.Column="0"/>
         <views:ClipPanelView Grid.Row="1" Grid.Column="1" Visibility="{Binding ShowingVideo, Converter={StaticResource BoolToInverseVisibilityConverter}}"/>
         <Grid Grid.Row="1" Grid.Column="1" Visibility="{Binding ShowingVideo, Converter={StaticResource BooleanToVisibilityConverter}}">
             <views:ClipVideoView Background="Transparent"/>
