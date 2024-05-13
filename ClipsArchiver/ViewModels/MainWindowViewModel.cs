@@ -305,9 +305,19 @@ public class MainWindowViewModel : ViewModelBase
         
         MediaPlayer.Media = new Media(LibVlc, SelectedClip.VideoUri);
         MediaPlayer.TimeChanged += MediaPlayerOnTimeChanged;
+        MediaPlayer.EndReached += OnEndReached;
         PlayVideo(true);
     }
-    
+
+    private void OnEndReached(object? sender, EventArgs e)
+    {
+        ThreadPool.QueueUserWorkItem((obj) =>
+        {
+            MediaPlayer.Stop();
+            IsPlaying = false;
+        });
+    }
+
     public void CloseActiveClip()
     {
         MediaPlayer.Stop();
