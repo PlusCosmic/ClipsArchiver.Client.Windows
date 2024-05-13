@@ -16,15 +16,40 @@
         <converters:ValueNullToInverseVisibilityConverter x:Key="NullToInverseVisibilityConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:BoolToInverseVisibilityConverter x:Key="BoolToInverseVisibilityConverter"/>
+        <converters:ValueNullToBoolConverter x:Key="ValueNullToBoolConverter"/>
     </UserControl.Resources>
     <Border CornerRadius="5" Margin="10">
         <Border.Style>
             <Style TargetType="Border">
-                <Setter Property="Background">
-                    <Setter.Value>
-                        <ImageBrush Opacity="0.1" Stretch="UniformToFill" ImageSource="{Binding SelectedClip.MapUri}"/>
-                    </Setter.Value>
-                </Setter>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding SelectedClip.MapUri, Converter={StaticResource ValueNullToBoolConverter}}" Value="True">
+                        <DataTrigger.Setters>
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Opacity="0.1" Color="Gray"/>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger.Setters>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding SelectedClip.MapUri, Converter={StaticResource ValueNullToBoolConverter}}" Value="False">
+                        <DataTrigger.Setters>
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <ImageBrush Opacity="0.1" Stretch="UniformToFill" ImageSource="{Binding SelectedClip.MapUri}"/>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger.Setters>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding SelectedClip, Converter={StaticResource ValueNullToBoolConverter}}" Value="True">
+                        <DataTrigger.Setters>
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Opacity="0.1" Color="Gray"/>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger.Setters>
+                    </DataTrigger>
+                </Style.Triggers>
             </Style>
         </Border.Style>
         <Grid>
