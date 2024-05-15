@@ -1,4 +1,6 @@
 using System.Windows;
+using ClipsArchiver.Entities;
+using ClipsArchiver.Services;
 using Serilog;
 using Velopack;
 
@@ -20,11 +22,17 @@ public class Program
                 .CreateLogger();
             
             var app = new App();
+            app.Exit += AppOnExit;
             app.InitializeComponent();
             app.Run();
         } catch (Exception ex) {
             Log.Fatal(ex, "Fatal Exception");
             MessageBox.Show(ex.Message);
         }
+    }
+
+    private static void AppOnExit(object sender, ExitEventArgs e)
+    {
+        SettingsService.SaveInMemorySettingsToDisk();
     }
 }
