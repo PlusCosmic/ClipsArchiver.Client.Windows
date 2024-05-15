@@ -154,6 +154,9 @@ public class MainWindowViewModel : ViewModelBase
             if (SetField(ref _videoVolume, value))
             {
                 MediaPlayer.Volume = value;
+                Settings settings = SettingsService.GetInMemorySetings();
+                settings.VideoVolume = value;
+                SettingsService.SaveInMemorySettings(settings);
             }
         }
     }
@@ -241,9 +244,13 @@ public class MainWindowViewModel : ViewModelBase
         AllTags = new ObservableCollection<string>();
         _libVlc = new LibVLC();
         _mediaPlayer = new MediaPlayer(LibVlc);
-        VideoVolume = 100;
         PlaybackSpeed = 100;
         Settings settings = SettingsService.GetSettings();
+        VideoVolume = 100;
+        if (settings.VideoVolume.HasValue)
+        {
+            VideoVolume = settings.VideoVolume.Value;
+        }
         if(settings.ShouldWatchClipsPath)
         {
             StartPollWatchFolder();
