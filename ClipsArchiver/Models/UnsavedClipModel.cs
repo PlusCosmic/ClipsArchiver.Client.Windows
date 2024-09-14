@@ -90,7 +90,8 @@ public class UnsavedClipModel() : ViewModelBase
             LocalClipInfo clipInfo = LocalDbService.GetInfoForFileName(_localFilename);
             clipInfo.ClipId = clip.Id;
             LocalDbService.SetInfoForFileName(clipInfo);
-            StartPollQueueStatus();
+            IsFinishedUploading = true;
+            Status = "uploaded";
         }
         catch (ClipExistsUploadException)
         {
@@ -101,32 +102,6 @@ public class UnsavedClipModel() : ViewModelBase
         {
             Status = "Error occured on upload";
             FailedUpload = true;
-        }
-    }
-
-    private void StartPollQueueStatus()
-    {
-        _timer = new Timer();
-        _timer.Interval = 1000 * 3;
-        _timer.AutoReset = true;
-        _timer.Elapsed += PollQueueStatus;
-        _timer.Start();
-    }
-
-    private async void PollQueueStatus(object? sender, ElapsedEventArgs e)
-    {
-        QueueEntry? queueEntry = await ClipsRestService.GetQueueEntryByClipIdAsync(_clipId);
-        if (queueEntry is null)
-        {
-            return;
-        }
-        QueueEntry = queueEntry;
-        Status = queueEntry?.Status ?? "";
-        if (queueEntry?.Status == "finished")
-        {
-            IsFinishedUploading = true;
-            ToastNotificationService.ShowSuccessNotification("Success", $"Uploaded {_localFilename}");
-            _timer?.Stop();
         }
     }
 }

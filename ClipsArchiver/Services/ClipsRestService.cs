@@ -14,6 +14,8 @@ namespace ClipsArchiver.Services;
 
 public class ClipsRestService
 {
+
+    private static SemaphoreSlim _semaphoreSlim = new(1, 1);
     
     private static HttpClient _httpClient = new(new HttpClientHandler
     {
@@ -39,6 +41,7 @@ public class ClipsRestService
 
     public static async Task<Clip> UploadClipAsync(string clipPath, int userId, int retryCount = 0)
     {
+        await _semaphoreSlim.WaitAsync();
         try
         {
             if (await GetClipExistsByFilenameAsync(Path.GetFileName(clipPath)))
@@ -85,9 +88,13 @@ public class ClipsRestService
                 throw;
             }
             Log.Error(ex, "Error uploading clip, retrying");
+            _semaphoreSlim.Release();
             return await UploadClipAsync(clipPath, userId, retryCount + 1);
         }
-        
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
     }
 
     public static async Task<List<User>> GetAllUsersAsync()
