@@ -1,3 +1,5 @@
+## Superceded by clips app in plus-cosmic-dev
+
 # ClipsArchiver
 
 [Server Components](https://github.com/PlusCosmic/ClipsArchiver.Server)
